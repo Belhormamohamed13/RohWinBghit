@@ -1,0 +1,44 @@
+services:
+  mongo:
+    image: mongo:7
+    container_name: rohwinbghit-mongo
+    restart: unless-stopped
+    environment:
+      MONGO_INITDB_DATABASE: rohwinbghit
+    ports:
+      - "27017:27017"
+    volumes:
+      - mongo_data:/data/db
+
+  api:
+    build:
+      context: ./apps/api
+      dockerfile: Dockerfile
+    container_name: rohwinbghit-api
+    restart: unless-stopped
+    env_file:
+      - ./apps/api/.env.example
+    environment:
+      MONGODB_URI: mongodb://mongo:27017/rohwinbghit
+      NODE_ENV: production
+    ports:
+      - "4000:4000"
+    depends_on:
+      - mongo
+
+  web:
+    build:
+      context: .
+      dockerfile: apps/web/Dockerfile
+    container_name: rohwinbghit-web
+    restart: unless-stopped
+    environment:
+      VITE_API_BASE_URL: http://localhost:4000/api
+    ports:
+      - "3000:80"
+    depends_on:
+      - api
+
+volumes:
+  mongo_data:
+

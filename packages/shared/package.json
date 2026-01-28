@@ -1,0 +1,15 @@
+{
+  "name": "@rohwinbghit/shared",
+  "private": true,
+  "version": "1.0.0",
+  "description": "Shared constants and datasets (Algeria) for RohWinBghit.",
+  "types": "./src/index.d.ts",
+  "exports": {
+    ".": {
+      "types": "./src/index.d.ts",
+      "import": "./src/index.mjs",
+      "require": "./src/index.cjs"
+    }
+  }
+}
+
