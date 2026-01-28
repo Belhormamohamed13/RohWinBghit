@@ -1,9 +1,10 @@
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
 
 import { DZ_WILAYAS } from "@rohwinbghit/shared";
+import { useRegisterMutation } from "../../../store/api/authApi";
 
 const schema = z
   .object({
@@ -36,6 +37,9 @@ const schema = z
 type Values = z.infer<typeof schema>;
 
 export function RegisterPage() {
+  const navigate = useNavigate();
+  const [registerUser, { isLoading, error }] = useRegisterMutation();
+
   const form = useForm<Values>({
     resolver: zodResolver(schema),
     defaultValues: {
@@ -52,9 +56,23 @@ export function RegisterPage() {
     }
   });
 
-  function onSubmit(values: Values) {
-    // eslint-disable-next-line no-console
-    console.log("register submit", values);
+  async function onSubmit(values: Values) {
+    try {
+      await registerUser({
+        firstName: values.firstName,
+        lastName: values.lastName,
+        email: values.email,
+        phone: values.phone,
+        password: values.password,
+        wilayaCode: values.wilayaCode,
+        isDriver: values.isDriver,
+        isPassenger: values.isPassenger
+      }).unwrap();
+
+      navigate("/login");
+    } catch (e) {
+      console.error("Register failed", e);
+    }
   }
 
   return (
@@ -74,9 +92,12 @@ export function RegisterPage() {
                 {...form.register("lastName")}
               />
               {form.formState.errors.lastName && (
-                <p className="mt-1 text-xs text-red-600">{form.formState.errors.lastName.message}</p>
+                <p className="mt-1 text-xs text-red-600">
+                  {form.formState.errors.lastName.message}
+                </p>
               )}
             </div>
+
             <div>
               <label className="text-xs font-semibold text-slate-600">Prénom</label>
               <input
@@ -84,7 +105,9 @@ export function RegisterPage() {
                 {...form.register("firstName")}
               />
               {form.formState.errors.firstName && (
-                <p className="mt-1 text-xs text-red-600">{form.formState.errors.firstName.message}</p>
+                <p className="mt-1 text-xs text-red-600">
+                  {form.formState.errors.firstName.message}
+                </p>
               )}
             </div>
           </div>
@@ -94,11 +117,12 @@ export function RegisterPage() {
               <label className="text-xs font-semibold text-slate-600">Email</label>
               <input
                 className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-blue"
-                placeholder="nom@exemple.com"
                 {...form.register("email")}
               />
               {form.formState.errors.email && (
-                <p className="mt-1 text-xs text-red-600">{form.formState.errors.email.message}</p>
+                <p className="mt-1 text-xs text-red-600">
+                  {form.formState.errors.email.message}
+                </p>
               )}
             </div>
 
@@ -106,11 +130,12 @@ export function RegisterPage() {
               <label className="text-xs font-semibold text-slate-600">Téléphone</label>
               <input
                 className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-blue"
-                placeholder="+2135xxxxxxxx"
                 {...form.register("phone")}
               />
               {form.formState.errors.phone && (
-                <p className="mt-1 text-xs text-red-600">{form.formState.errors.phone.message}</p>
+                <p className="mt-1 text-xs text-red-600">
+                  {form.formState.errors.phone.message}
+                </p>
               )}
             </div>
           </div>
@@ -128,73 +153,12 @@ export function RegisterPage() {
                 </option>
               ))}
             </select>
-            {form.formState.errors.wilayaCode && (
-              <p className="mt-1 text-xs text-red-600">{form.formState.errors.wilayaCode.message}</p>
-            )}
           </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <label className="text-xs font-semibold text-slate-600">Mot de passe</label>
-              <input
-                type="password"
-                className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-blue"
-                {...form.register("password")}
-              />
-              {form.formState.errors.password && (
-                <p className="mt-1 text-xs text-red-600">{form.formState.errors.password.message}</p>
-              )}
-            </div>
-            <div>
-              <label className="text-xs font-semibold text-slate-600">Confirmation</label>
-              <input
-                type="password"
-                className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-blue"
-                {...form.register("confirmPassword")}
-              />
-              {form.formState.errors.confirmPassword && (
-                <p className="mt-1 text-xs text-red-600">
-                  {form.formState.errors.confirmPassword.message}
-                </p>
-              )}
-            </div>
-          </div>
-
-          <fieldset className="rounded-2xl border border-slate-200 p-4">
-            <legend className="px-1 text-xs font-semibold text-slate-600">Rôle</legend>
-            <div className="mt-2 grid gap-2">
-              <label className="flex items-center gap-2 text-sm text-slate-700">
-                <input type="checkbox" className="h-4 w-4" {...form.register("isDriver")} />
-                Je suis conducteur
-              </label>
-              <label className="flex items-center gap-2 text-sm text-slate-700">
-                <input type="checkbox" className="h-4 w-4" {...form.register("isPassenger")} />
-                Je suis passager
-              </label>
-              {(form.formState.errors.isDriver || form.formState.errors.isPassenger) && (
-                <p className="text-xs text-red-600">
-                  {form.formState.errors.isDriver?.message ??
-                    form.formState.errors.isPassenger?.message}
-                </p>
-              )}
-            </div>
-          </fieldset>
-
-          <label className="flex items-start gap-2 text-sm text-slate-700">
-            <input type="checkbox" className="mt-1 h-4 w-4" {...form.register("acceptCgu")} />
-            <span>
-              J’accepte les{" "}
-              <NavLink className="text-brand-blue hover:underline" to="/legal/cgu">
-                CGU
-              </NavLink>
-              .
-            </span>
-          </label>
-          {form.formState.errors.acceptCgu && (
-            <p className="text-xs text-red-600">{form.formState.errors.acceptCgu.message}</p>
-          )}
-
-          <button className="rounded-xl bg-brand-green px-4 py-3 text-sm font-semibold text-white hover:bg-brand-green-dark">
+          <button
+            disabled={isLoading}
+            className="rounded-xl bg-brand-green px-4 py-3 text-sm font-semibold text-white hover:bg-brand-green-dark disabled:opacity-60"
+          >
             S’inscrire
           </button>
 
@@ -209,4 +173,3 @@ export function RegisterPage() {
     </div>
   );
 }
-

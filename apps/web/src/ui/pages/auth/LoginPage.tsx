@@ -1,7 +1,9 @@
 import { z } from "zod";
 import { useForm } from "react-hook-form";
 import { zodResolver } from "@hookform/resolvers/zod";
-import { NavLink } from "react-router-dom";
+import { NavLink, useNavigate } from "react-router-dom";
+
+import { useLoginMutation } from "../../../store/api/authApi";
 
 const schema = z.object({
   email: z.string().email("Email invalide"),
@@ -11,15 +13,27 @@ const schema = z.object({
 type Values = z.infer<typeof schema>;
 
 export function LoginPage() {
+  const navigate = useNavigate();
+  const [login, { isLoading, error }] = useLoginMutation();
+
   const form = useForm<Values>({
     resolver: zodResolver(schema),
-    defaultValues: { email: "", password: "" }
+    defaultValues: {
+      email: "",
+      password: ""
+    }
   });
 
-  function onSubmit(values: Values) {
-    // UI is wired; API auth endpoints will be connected in the next backend step.
-    // eslint-disable-next-line no-console
-    console.log("login submit", values);
+  async function onSubmit(values: Values) {
+    try {
+      const res = await login(values).unwrap();
+      console.log("LOGIN SUCCESS", res);
+
+      // accessToken est déjà stocké via axios interceptor
+      navigate("/dashboard");
+    } catch (err) {
+      console.error("LOGIN FAILED", err);
+    }
   }
 
   return (
@@ -31,36 +45,60 @@ export function LoginPage() {
         </p>
 
         <form className="mt-6 grid gap-4" onSubmit={form.handleSubmit(onSubmit)}>
+          {/* EMAIL */}
           <div>
             <label className="text-xs font-semibold text-slate-600">Email</label>
             <input
+              type="email"
               className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-blue"
               placeholder="nom@exemple.com"
               {...form.register("email")}
             />
             {form.formState.errors.email && (
-              <p className="mt-1 text-xs text-red-600">{form.formState.errors.email.message}</p>
+              <p className="mt-1 text-xs text-red-600">
+                {form.formState.errors.email.message}
+              </p>
             )}
           </div>
 
+          {/* PASSWORD */}
           <div>
-            <label className="text-xs font-semibold text-slate-600">Mot de passe</label>
+            <label className="text-xs font-semibold text-slate-600">
+              Mot de passe
+            </label>
             <input
               type="password"
               className="mt-1 w-full rounded-xl border border-slate-200 px-3 py-2 text-sm outline-none focus:border-brand-blue"
               {...form.register("password")}
             />
             {form.formState.errors.password && (
-              <p className="mt-1 text-xs text-red-600">{form.formState.errors.password.message}</p>
+              <p className="mt-1 text-xs text-red-600">
+                {form.formState.errors.password.message}
+              </p>
             )}
           </div>
 
-          <NavLink className="text-sm text-brand-blue hover:underline" to="/forgot-password">
+          <NavLink
+            className="text-sm text-brand-blue hover:underline"
+            to="/forgot-password"
+          >
             Mot de passe oublié ?
           </NavLink>
 
-          <button className="rounded-xl bg-brand-green px-4 py-3 text-sm font-semibold text-white hover:bg-brand-green-dark">
-            Se connecter
+          {/* ERROR BACKEND */}
+          {error && (
+            <p className="text-sm text-red-600">
+              Email ou mot de passe incorrect
+            </p>
+          )}
+
+          {/* SUBMIT */}
+          <button
+            type="submit"
+            disabled={isLoading}
+            className="rounded-xl bg-brand-green px-4 py-3 text-sm font-semibold text-white hover:bg-brand-green-dark disabled:opacity-60"
+          >
+            {isLoading ? "Connexion..." : "Se connecter"}
           </button>
 
           <div className="text-sm text-slate-600">
@@ -74,4 +112,3 @@ export function LoginPage() {
     </div>
   );
 }
-
