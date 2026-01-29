@@ -11,7 +11,7 @@
   },
   "dependencies": {
     "@hookform/resolvers": "^3.10.0",
-    "@rohwinbghit/shared": "workspace:*",
+    "@rohwinbghit/shared": "file:../../packages/shared",
     "@reduxjs/toolkit": "^2.5.0",
     "axios": "^1.7.9",
     "dayjs": "^1.11.13",

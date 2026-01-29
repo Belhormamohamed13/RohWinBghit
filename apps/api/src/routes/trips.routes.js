@@ -8,10 +8,12 @@ const { tripSchemas } = require("../validations/trip.validation");
 const tripsRouter = express.Router();
 
 tripsRouter.get("/", validate(tripSchemas.searchTrips), tripController.search);
-tripsRouter.get("/:id", tripController.detail);
+tripsRouter.get("/me/mine", requireAuth, tripController.myTrips);
 tripsRouter.post("/", requireAuth, validate(tripSchemas.createTrip), tripController.create);
 tripsRouter.post("/:id/cancel", requireAuth, tripController.cancel);
-tripsRouter.get("/me/mine", requireAuth, tripController.myTrips);
+tripsRouter.patch("/:id/publish", requireAuth, tripController.publish);
+tripsRouter.patch("/:id/close", requireAuth, tripController.close);
+tripsRouter.get("/:id", tripController.detail);
 
 module.exports = { tripsRouter };
 

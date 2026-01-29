@@ -12,9 +12,9 @@ bookingsRouter.use(requireAuth);
 bookingsRouter.post("/", validate(bookingSchemas.createBooking), bookingController.create);
 bookingsRouter.get("/me", bookingController.listMine);
 bookingsRouter.get("/trip/:tripId", bookingController.listForTrip);
-bookingsRouter.post("/:id/accept", bookingController.accept);
-bookingsRouter.post("/:id/reject", bookingController.reject);
-bookingsRouter.post("/:id/cancel", bookingController.cancel);
+bookingsRouter.patch("/:id/accept", bookingController.accept);
+bookingsRouter.patch("/:id/reject", bookingController.reject);
+bookingsRouter.patch("/:id/cancel", bookingController.cancel);
 
 module.exports = { bookingsRouter };
 

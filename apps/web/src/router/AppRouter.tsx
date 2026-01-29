@@ -10,7 +10,7 @@ import { HowItWorksPage } from "../ui/pages/public/HowItWorksPage";
 import { TrustSafetyPage } from "../ui/pages/public/TrustSafetyPage";
 import { ContactPage } from "../ui/pages/public/ContactPage";
 import { LegalPage } from "../ui/pages/public/LegalPage";
-import { LoginPage } from "../ui/pages/auth/LoginPage };
+import { LoginPage } from "../ui/pages/auth/LoginPage";
 import { RegisterPage } from "../ui/pages/auth/RegisterPage";
 import { ForgotPasswordPage } from "../ui/pages/auth/ForgotPasswordPage";
 import { DashboardHomePage } from "../ui/pages/dashboard/DashboardHomePage";

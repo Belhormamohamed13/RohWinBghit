@@ -1,4 +1,5 @@
 const { tripService } = require("../services/trip.service");
+const { tripLifecycleService } = require("../services/tripLifecycle.service");
 
 const tripController = {
   async create(req, res, next) {
@@ -57,6 +58,36 @@ const tripController = {
     try {
       const trips = await tripService.listMyTrips(req.auth.user._id);
       return res.json({ success: true, data: trips });
+    } catch (err) {
+      return next(err);
+    }
+  },
+
+  async publish(req, res, next) {
+    try {
+      const trip = await tripLifecycleService.publishTrip(req.params.id, req.auth.user._id);
+      return res.json({
+        success: true,
+        data: {
+          id: String(trip._id),
+          status: trip.status
+        }
+      });
+    } catch (err) {
+      return next(err);
+    }
+  },
+
+  async close(req, res, next) {
+    try {
+      const trip = await tripLifecycleService.closeTrip(req.params.id, req.auth.user._id);
+      return res.json({
+        success: true,
+        data: {
+          id: String(trip._id),
+          status: trip.status
+        }
+      });
     } catch (err) {
       return next(err);
     }

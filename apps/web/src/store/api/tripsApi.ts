@@ -8,6 +8,11 @@ export type SearchTripsArgs = {
   seats?: number;
 };
 
+export type TripActionDto = {
+  id: string;
+  status: TripDto["status"];
+};
+
 export const tripsApi = api.injectEndpoints({
   endpoints: (build) => ({
     searchTrips: build.query<ApiResponse<TripDto[]>, SearchTripsArgs>({
@@ -32,9 +37,16 @@ export const tripsApi = api.injectEndpoints({
     getTripById: build.query<ApiResponse<TripDto>, string>({
       query: (id) => ({ url: `/trips/${id}`, method: "GET" }),
       providesTags: (result, _error, id) => [{ type: "Trip" as const, id }]
+    }),
+
+    publishTrip: build.mutation<ApiResponse<TripActionDto>, string>({
+      query: (tripId) => ({ url: `/trips/${tripId}/publish`, method: "PATCH" })
+    }),
+    closeTrip: build.mutation<ApiResponse<TripActionDto>, string>({
+      query: (tripId) => ({ url: `/trips/${tripId}/close`, method: "PATCH" })
     })
   })
 });
 
-export const { useSearchTripsQuery, useGetTripByIdQuery } = tripsApi;
+export const { useSearchTripsQuery, useGetTripByIdQuery, usePublishTripMutation, useCloseTripMutation } = tripsApi;
 

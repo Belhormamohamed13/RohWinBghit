@@ -4,7 +4,7 @@ const { authService } = require("../services/auth.service");
 
 const REFRESH_COOKIE = "rw_refresh";
 
-const refreshCookieOptions = (req) => {
+const refreshCookieOptions = () => {
   const isSecure = String(process.env.COOKIE_SECURE) === "true";
   return {
     httpOnly: true,
@@ -19,7 +19,7 @@ const authController = {
     try {
       const { body } = req.validated;
       const result = await authService.register(body);
-      res.cookie(REFRESH_COOKIE, result.refreshToken, refreshCookieOptions(req));
+      res.cookie(REFRESH_COOKIE, result.refreshToken, refreshCookieOptions());
       return res.status(201).json({
         success: true,
         data: { user: result.user, accessToken: result.accessToken }
@@ -33,7 +33,7 @@ const authController = {
     try {
       const { body } = req.validated;
       const result = await authService.login(body);
-      res.cookie(REFRESH_COOKIE, result.refreshToken, refreshCookieOptions(req));
+      res.cookie(REFRESH_COOKIE, result.refreshToken, refreshCookieOptions());
       return res.json({
         success: true,
         data: { user: result.user, accessToken: result.accessToken }
@@ -49,7 +49,7 @@ const authController = {
       if (!refreshToken) throw createError(401, "Missing refresh token");
 
       const result = await authService.refresh(refreshToken);
-      res.cookie(REFRESH_COOKIE, result.refreshToken, refreshCookieOptions(req));
+      res.cookie(REFRESH_COOKIE, result.refreshToken, refreshCookieOptions());
       return res.json({
         success: true,
         data: { accessToken: result.accessToken }

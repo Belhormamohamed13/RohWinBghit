@@ -44,7 +44,7 @@ const messageService = {
     return message;
   },
 
-  async getMessagesByTrip(tripId, userId) {
+  async getMessagesByTrip(tripId) {
     const trip = await Trip.findById(tripId);
     if (!trip) throw createError(404, "Trip not found");
 

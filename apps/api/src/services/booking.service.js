@@ -68,12 +68,14 @@ const bookingService = {
     trip.seatsAvailable -= booking.seatCount;
     await trip.save();
 
+    const previousStatus = "pending";
+    const newStatus = "accepted";
     emitDomainEvent("booking.statusChanged", {
       bookingId: String(booking._id),
       tripId: String(trip._id),
-      status: booking.status,
-      seatCount: booking.seatCount,
-      previousStatus: "pending"
+      previousStatus,
+      newStatus,
+      seatCount: booking.seatCount
     });
 
     return booking;
@@ -94,12 +96,14 @@ const bookingService = {
     booking.status = "rejected";
     await booking.save();
 
+    const previousStatus = "pending";
+    const newStatus = "rejected";
     emitDomainEvent("booking.statusChanged", {
       bookingId: String(booking._id),
       tripId: String(trip._id),
-      status: booking.status,
-      seatCount: booking.seatCount,
-      previousStatus: "pending"
+      previousStatus,
+      newStatus,
+      seatCount: booking.seatCount
     });
 
     return booking;
@@ -127,12 +131,13 @@ const bookingService = {
     booking.status = "cancelled";
     await booking.save();
 
+    const newStatus = "cancelled";
     emitDomainEvent("booking.statusChanged", {
       bookingId: String(booking._id),
       tripId: String(trip._id),
-      status: booking.status,
-      seatCount: booking.seatCount,
-      previousStatus
+      previousStatus,
+      newStatus,
+      seatCount: booking.seatCount
     });
 
     return booking;

@@ -16,7 +16,16 @@ const bookingController = {
   async accept(req, res, next) {
     try {
       const booking = await bookingService.acceptBooking(req.params.id, req.auth.user._id);
-      return res.json({ success: true, data: booking });
+      return res.json({
+        success: true,
+        data: {
+          id: String(booking._id),
+          status: booking.status,
+          seatCount: booking.seatCount,
+          tripId: String(booking.trip),
+          passengerId: String(booking.passenger)
+        }
+      });
     } catch (err) {
       return next(err);
     }
@@ -25,7 +34,16 @@ const bookingController = {
   async reject(req, res, next) {
     try {
       const booking = await bookingService.rejectBooking(req.params.id, req.auth.user._id);
-      return res.json({ success: true, data: booking });
+      return res.json({
+        success: true,
+        data: {
+          id: String(booking._id),
+          status: booking.status,
+          seatCount: booking.seatCount,
+          tripId: String(booking.trip),
+          passengerId: String(booking.passenger)
+        }
+      });
     } catch (err) {
       return next(err);
     }
@@ -34,7 +52,16 @@ const bookingController = {
   async cancel(req, res, next) {
     try {
       const booking = await bookingService.cancelBooking(req.params.id, req.auth.user._id);
-      return res.json({ success: true, data: booking });
+      return res.json({
+        success: true,
+        data: {
+          id: String(booking._id),
+          status: booking.status,
+          seatCount: booking.seatCount,
+          tripId: String(booking.trip),
+          passengerId: String(booking.passenger)
+        }
+      });
     } catch (err) {
       return next(err);
     }

@@ -22,7 +22,7 @@ export type TripDto = {
   seatsAvailable: number;
   pricePerSeat: number;
   description: string;
-  status: "draft" | "published" | "in_progress" | "completed" | "cancelled";
+  status: "draft" | "published" | "closed" | "in_progress" | "completed" | "cancelled";
 };
 
 export type BookingDto = {
