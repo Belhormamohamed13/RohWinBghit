@@ -1,13 +1,9 @@
 const bcrypt = require("bcryptjs");
 const createError = require("http-errors");
-const crypto = require("crypto"); // ✅ native, ESM-safe
+const { nanoid } = require("nanoid");
 
 const { User } = require("../models/user.model");
-const {
-  signAccessToken,
-  signRefreshToken,
-  verifyRefreshToken
-} = require("../utils/tokens");
+const { signAccessToken, signRefreshToken, verifyRefreshToken } = require("../utils/tokens");
 
 function publicUser(userDoc) {
   return {
@@ -31,11 +27,9 @@ const authService = {
     const existing = await User.findOne({
       $or: [{ email: input.email.toLowerCase() }, { phone: input.phone }]
     }).lean();
-
     if (existing) throw createError(409, "Email or phone already in use");
 
     const passwordHash = await bcrypt.hash(input.password, 12);
-
     const user = await User.create({
       firstName: input.firstName,
       lastName: input.lastName,
@@ -48,7 +42,7 @@ const authService = {
       roles: ["user"]
     });
 
-    const tokenId = crypto.randomUUID(); // ✅ FIX
+    const tokenId = nanoid();
     const accessToken = signAccessToken(String(user._id));
     const refreshToken = signRefreshToken(String(user._id), tokenId);
 
@@ -66,7 +60,7 @@ const authService = {
     user.lastLoginAt = new Date();
     await user.save();
 
-    const tokenId = crypto.randomUUID(); // ✅ FIX
+    const tokenId = nanoid();
     const accessToken = signAccessToken(String(user._id));
     const refreshToken = signRefreshToken(String(user._id), tokenId);
 
@@ -85,7 +79,7 @@ const authService = {
     if (!user) throw createError(401, "Invalid refresh token");
     if (user.accountStatus !== "active") throw createError(403, "Account not active");
 
-    const tokenId = crypto.randomUUID(); // ✅ FIX
+    const tokenId = nanoid();
     const accessToken = signAccessToken(String(user._id));
     const rotatedRefreshToken = signRefreshToken(String(user._id), tokenId);
 
@@ -94,3 +88,4 @@ const authService = {
 };
 
 module.exports = { authService };
+

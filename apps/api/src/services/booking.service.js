@@ -71,7 +71,9 @@ const bookingService = {
     emitDomainEvent("booking.statusChanged", {
       bookingId: String(booking._id),
       tripId: String(trip._id),
-      status: booking.status
+      status: booking.status,
+      seatCount: booking.seatCount,
+      previousStatus: "pending"
     });
 
     return booking;
@@ -95,7 +97,9 @@ const bookingService = {
     emitDomainEvent("booking.statusChanged", {
       bookingId: String(booking._id),
       tripId: String(trip._id),
-      status: booking.status
+      status: booking.status,
+      seatCount: booking.seatCount,
+      previousStatus: "pending"
     });
 
     return booking;
@@ -114,7 +118,8 @@ const bookingService = {
       throw createError(403, "You are not part of this booking");
     }
 
-    if (booking.status === "accepted") {
+    const previousStatus = booking.status;
+    if (previousStatus === "accepted") {
       trip.seatsAvailable += booking.seatCount;
       await trip.save();
     }
@@ -125,7 +130,9 @@ const bookingService = {
     emitDomainEvent("booking.statusChanged", {
       bookingId: String(booking._id),
       tripId: String(trip._id),
-      status: booking.status
+      status: booking.status,
+      seatCount: booking.seatCount,
+      previousStatus
     });
 
     return booking;

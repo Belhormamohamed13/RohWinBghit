@@ -4,22 +4,8 @@ const userSchema = new mongoose.Schema(
   {
     firstName: { type: String, required: true, trim: true },
     lastName: { type: String, required: true, trim: true },
-
-    email: {
-      type: String,
-      required: true,
-      unique: true,
-      lowercase: true,
-      trim: true
-    },
-
-    phone: {
-      type: String,
-      required: true,
-      unique: true,
-      trim: true
-    },
-
+    email: { type: String, required: true, unique: true, lowercase: true, trim: true },
+    phone: { type: String, required: true, unique: true, trim: true },
     passwordHash: { type: String, required: true },
     profilePhotoUrl: { type: String, default: "" },
     wilayaCode: { type: String, required: true },
@@ -27,18 +13,8 @@ const userSchema = new mongoose.Schema(
     isDriver: { type: Boolean, default: false },
     isPassenger: { type: Boolean, default: true },
 
-    roles: {
-      type: [String],
-      default: ["user"],
-      index: true
-    },
-
-    accountStatus: {
-      type: String,
-      enum: ["active", "suspended", "deleted"],
-      default: "active",
-      index: true
-    },
+    roles: { type: [String], default: ["user"] }, // user | admin
+    accountStatus: { type: String, enum: ["active", "suspended", "deleted"], default: "active" },
 
     verification: {
       emailVerified: { type: Boolean, default: false },
@@ -59,6 +35,12 @@ const userSchema = new mongoose.Schema(
   { timestamps: true }
 );
 
+userSchema.index({ email: 1 }, { unique: true });
+userSchema.index({ phone: 1 }, { unique: true });
+userSchema.index({ roles: 1 });
+userSchema.index({ accountStatus: 1 });
+
 const User = mongoose.model("User", userSchema);
 
 module.exports = { User };
+

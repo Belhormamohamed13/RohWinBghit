@@ -64,6 +64,13 @@ const tripService = {
     return trip;
   },
 
+  async listMyTrips(driverId) {
+    const trips = await Trip.find({ driver: driverId })
+      .sort({ departureAt: 1 })
+      .lean();
+    return trips;
+  },
+
   async cancelTrip(tripId, driverId) {
     const trip = await Trip.findById(tripId);
     if (!trip) throw createError(404, "Trip not found");

@@ -51,6 +51,15 @@ const tripController = {
     } catch (err) {
       return next(err);
     }
+  },
+
+  async myTrips(req, res, next) {
+    try {
+      const trips = await tripService.listMyTrips(req.auth.user._id);
+      return res.json({ success: true, data: trips });
+    } catch (err) {
+      return next(err);
+    }
   }
 };
 

@@ -3,6 +3,7 @@ import { Link, useParams } from "react-router-dom";
 
 import { useGetTripByIdQuery } from "../../../store/api/tripsApi";
 import { useCreateBookingMutation } from "../../../store/api/bookingsApi";
+import { TripMessagesPanel } from "../../components/TripMessagesPanel";
 
 export function TripDetailPage() {
   const { tripId } = useParams();
@@ -115,6 +116,8 @@ export function TripDetailPage() {
                 {trip.description || "Trajet publié sur RohWinBghit."}
               </p>
             </div>
+
+            <TripMessagesPanel tripId={tripId!} driverId={String(trip.driver)} />
           </section>
 
           <aside className="lg:sticky lg:top-24">

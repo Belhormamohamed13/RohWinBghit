@@ -11,6 +11,7 @@ tripsRouter.get("/", validate(tripSchemas.searchTrips), tripController.search);
 tripsRouter.get("/:id", tripController.detail);
 tripsRouter.post("/", requireAuth, validate(tripSchemas.createTrip), tripController.create);
 tripsRouter.post("/:id/cancel", requireAuth, tripController.cancel);
+tripsRouter.get("/me/mine", requireAuth, tripController.myTrips);
 
 module.exports = { tripsRouter };
 

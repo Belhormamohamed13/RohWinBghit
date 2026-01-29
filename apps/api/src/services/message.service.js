@@ -28,10 +28,17 @@ const messageService = {
     });
 
     emitDomainEvent("message.created", {
-      messageId: String(message._id),
-      senderId: String(senderId),
-      receiverId: String(input.receiverId),
-      tripId: trip ? String(trip._id) : undefined
+      tripId: trip ? String(trip._id) : undefined,
+      message: {
+        _id: String(message._id),
+        sender: String(message.sender),
+        receiver: String(message.receiver),
+        trip: message.trip ? String(message.trip) : undefined,
+        booking: message.booking ? String(message.booking) : undefined,
+        content: message.content,
+        createdAt: message.createdAt,
+        updatedAt: message.updatedAt
+      }
     });
 
     return message;
