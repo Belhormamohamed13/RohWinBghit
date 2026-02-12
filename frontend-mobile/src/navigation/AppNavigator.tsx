@@ -1,4 +1,5 @@
-import { useEffect, useState } from 'react'
+import React, { useEffect, useState } from 'react'
+import { View } from 'react-native'
 import { createNativeStackNavigator } from '@react-navigation/native-stack'
 import { createBottomTabNavigator } from '@react-navigation/bottom-tabs'
 import { useAuthStore } from '../store/authStore'
@@ -18,6 +19,7 @@ import PublishTripScreen from '../screens/driver/PublishTripScreen'
 import TripDetailsScreen from '../screens/main/TripDetailsScreen'
 import BookingScreen from '../screens/passenger/BookingScreen'
 import TicketScreen from '../screens/passenger/TicketScreen'
+import SearchResultsScreen from '../screens/main/SearchResultsScreen'
 
 const Stack = createNativeStackNavigator()
 const Tab = createBottomTabNavigator()
@@ -56,21 +58,21 @@ const MainTabs = () => {
         headerShown: false,
       })}
     >
-      <Tab.Screen 
-        name="Home" 
+      <Tab.Screen
+        name="Home"
         component={HomeScreen}
         options={{ title: 'Accueil' }}
       />
-      <Tab.Screen 
-        name="Search" 
+      <Tab.Screen
+        name="Search"
         component={SearchScreen}
         options={{ title: 'Rechercher' }}
       />
       {user?.role === 'driver' && (
-        <Tab.Screen 
-          name="Publish" 
+        <Tab.Screen
+          name="Publish"
           component={PublishTripScreen}
-          options={{ 
+          options={{
             title: 'Publier',
             tabBarIcon: ({ color, size }) => (
               <Ionicons name="add-circle" size={size} color={color} />
@@ -78,18 +80,18 @@ const MainTabs = () => {
           }}
         />
       )}
-      <Tab.Screen 
-        name="Trips" 
+      <Tab.Screen
+        name="Trips"
         component={TripsScreen}
         options={{ title: 'Mes trajets' }}
       />
-      <Tab.Screen 
-        name="Messages" 
+      <Tab.Screen
+        name="Messages"
         component={MessagesScreen}
         options={{ title: 'Messages' }}
       />
-      <Tab.Screen 
-        name="Profile" 
+      <Tab.Screen
+        name="Profile"
         component={ProfileScreen}
         options={{ title: 'Profil' }}
       />
@@ -119,6 +121,7 @@ const AppNavigator = () => {
     )
   }
 
+
   return (
     <Stack.Navigator screenOptions={{ headerShown: false }}>
       {!hasSeenOnboarding ? (
@@ -133,18 +136,23 @@ const AppNavigator = () => {
         // Main App Stack
         <>
           <Stack.Screen name="Main" component={MainTabs} />
-          <Stack.Screen 
-            name="TripDetails" 
+          <Stack.Screen
+            name="TripDetails"
             component={TripDetailsScreen}
             options={{ headerShown: true, title: 'Détails du trajet' }}
           />
-          <Stack.Screen 
-            name="Booking" 
+          <Stack.Screen
+            name="SearchResults"
+            component={SearchResultsScreen}
+            options={{ headerShown: true, title: 'Résultats' }}
+          />
+          <Stack.Screen
+            name="Booking"
             component={BookingScreen}
             options={{ headerShown: true, title: 'Réservation' }}
           />
-          <Stack.Screen 
-            name="Ticket" 
+          <Stack.Screen
+            name="Ticket"
             component={TicketScreen}
             options={{ headerShown: true, title: 'Mon billet' }}
           />

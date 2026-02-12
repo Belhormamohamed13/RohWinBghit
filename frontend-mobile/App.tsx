@@ -1,3 +1,4 @@
+import 'react-native-gesture-handler'
 import { useEffect, useState } from 'react'
 import { StatusBar } from 'expo-status-bar'
 import { SafeAreaProvider } from 'react-native-safe-area-context'
@@ -29,6 +30,7 @@ export default function App() {
   useEffect(() => {
     async function prepare() {
       try {
+        /*
         // Load fonts
         await Font.loadAsync({
           'Inter-Regular': require('./assets/fonts/Inter-Regular.ttf'),
@@ -36,11 +38,12 @@ export default function App() {
           'Inter-SemiBold': require('./assets/fonts/Inter-SemiBold.ttf'),
           'Inter-Bold': require('./assets/fonts/Inter-Bold.ttf'),
         })
+        */
 
         // Initialize auth state
         await initializeAuth()
       } catch (e) {
-        console.warn(e)
+        console.warn('Initialization warning:', e)
       } finally {
         setAppIsReady(true)
       }

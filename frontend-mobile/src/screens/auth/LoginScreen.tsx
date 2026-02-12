@@ -1,8 +1,10 @@
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform } from 'react-native'
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, Alert } from 'react-native'
 import { useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { Ionicons } from '@expo/vector-icons'
 import { colors, spacing } from '../../constants/theme'
+import { authApi } from '../../services/api'
+import { useAuthStore } from '../../store/authStore'
 
 const LoginScreen = () => {
   const [email, setEmail] = useState('')
@@ -11,12 +13,31 @@ const LoginScreen = () => {
   const [isLoading, setIsLoading] = useState(false)
   const navigation = useNavigation()
 
+  const login = useAuthStore((state) => state.login)
+  const setTokens = useAuthStore((state) => state.setTokens)
+
   const handleLogin = async () => {
+    if (!email || !password) {
+      Alert.alert('Erreur', 'Veuillez remplir tous les champs')
+      return
+    }
+
     setIsLoading(true)
-    // TODO: Implement login logic
-    setTimeout(() => {
+    try {
+      // 1. Authenticate with backend
+      const response = await authApi.login(email, password)
+      const { user, accessToken, refreshToken } = response.data.data
+
+      // 2. Update store
+      login(user, accessToken, refreshToken)
+
+    } catch (error: any) {
+      console.error(error)
+      const message = error.response?.data?.message || 'Erreur de connexion. Veuillez vérifier vos identifiants.'
+      Alert.alert('Erreur', message)
+    } finally {
       setIsLoading(false)
-    }, 1500)
+    }
   }
 
   return (

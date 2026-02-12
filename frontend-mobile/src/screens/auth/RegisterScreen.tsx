@@ -1,8 +1,9 @@
-import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView } from 'react-native'
+import { View, Text, StyleSheet, TextInput, TouchableOpacity, KeyboardAvoidingView, Platform, ScrollView, Alert } from 'react-native'
 import { useState } from 'react'
 import { useNavigation } from '@react-navigation/native'
 import { Ionicons } from '@expo/vector-icons'
 import { colors, spacing } from '../../constants/theme'
+import { authApi } from '../../services/api'
 
 const RegisterScreen = () => {
   const [firstName, setFirstName] = useState('')
@@ -16,12 +17,35 @@ const RegisterScreen = () => {
   const navigation = useNavigation()
 
   const handleRegister = async () => {
+    if (!firstName || !lastName || !email || !password || !phone) {
+      Alert.alert('Erreur', 'Veuillez remplir tous les champs')
+      return
+    }
+
     setIsLoading(true)
-    // TODO: Implement register logic
-    setTimeout(() => {
+    try {
+      const response = await authApi.register({
+        firstName,
+        lastName,
+        email,
+        phone,
+        password,
+        role,
+      })
+
+      Alert.alert(
+        'Compte créé',
+        'Votre compte a été créé avec succès. Veuillez vous connecter.',
+        [{ text: 'OK', onPress: () => navigation.navigate('Login' as never) }]
+      )
+
+    } catch (error: any) {
+      console.error(error)
+      const message = error.response?.data?.message || 'Erreur lors de l\'inscription.'
+      Alert.alert('Erreur', message)
+    } finally {
       setIsLoading(false)
-      navigation.navigate('Login' as never)
-    }, 1500)
+    }
   }
 
   return (

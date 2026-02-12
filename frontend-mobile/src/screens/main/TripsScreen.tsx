@@ -1,72 +1,106 @@
-import { View, Text, StyleSheet, TouchableOpacity, FlatList } from 'react-native'
+import { View, Text, StyleSheet, TouchableOpacity, FlatList, ActivityIndicator } from 'react-native'
 import { useState } from 'react'
 import { Ionicons } from '@expo/vector-icons'
+import { useQuery } from '@tanstack/react-query'
+import { bookingsApi, tripsApi } from '../../services/api'
 import { colors, spacing } from '../../constants/theme'
+import { useAuthStore } from '../../store/authStore'
+import { format } from 'date-fns'
+import { fr } from 'date-fns/locale'
 
-const tabs = ['À venir', 'Passés', 'Annulés']
-
-const mockTrips = [
-  {
-    id: '1',
-    from: 'Alger',
-    to: 'Oran',
-    date: '15 Jan 2024',
-    time: '08:00',
-    status: 'confirmed',
-    price: '800 DZD',
-    seats: 2,
-  },
-  {
-    id: '2',
-    from: 'Oran',
-    to: 'Alger',
-    date: '20 Jan 2024',
-    time: '14:00',
-    status: 'pending',
-    price: '800 DZD',
-    seats: 1,
-  },
-]
+const tabs = ['À venir', 'Passés']
 
 const TripsScreen = () => {
   const [activeTab, setActiveTab] = useState(0)
+  const user = useAuthStore(state => state.user)
 
-  const renderTrip = ({ item }: { item: typeof mockTrips[0] }) => (
-    <TouchableOpacity style={styles.tripCard}>
-      <View style={styles.tripHeader}>
-        <View style={styles.routeInfo}>
-          <Text style={styles.city}>{item.from}</Text>
-          <Ionicons name="arrow-forward" size={16} color={colors.dark[400]} />
-          <Text style={styles.city}>{item.to}</Text>
+  // Fetch bookings for passengers
+  const { data: bookings, isLoading: isLoadingBookings } = useQuery({
+    queryKey: ['my-bookings'],
+    queryFn: async () => {
+      const response = await bookingsApi.getMyBookings()
+      return response.data.data
+    },
+    enabled: !!user && user.role === 'passenger'
+  })
+
+  // Fetch trips for drivers (if we implemented that endpoint completely)
+  const { data: driverTrips, isLoading: isLoadingDriverTrips } = useQuery({
+    queryKey: ['my-trips'],
+    queryFn: async () => {
+      // Assuming we have an endpoint for driver's trips, or filter trips by driverId
+      // For now, let's just stick to passenger bookings as primary use case or use a placeholder
+      return []
+    },
+    enabled: !!user && user.role === 'driver'
+  })
+
+  const isLoading = isLoadingBookings || isLoadingDriverTrips
+  const data = user?.role === 'driver' ? driverTrips : bookings
+
+  const filterTrips = (trips: any[]) => {
+    if (!trips) return []
+    const now = new Date()
+    return trips.filter(item => {
+      const tripDate = new Date(item.trip?.departure?.date || item.departure?.date)
+      if (activeTab === 0) {
+        return tripDate >= now
+      } else {
+        return tripDate < now
+      }
+    })
+  }
+
+  const filteredData = filterTrips(data)
+
+  const renderItem = ({ item }: { item: any }) => {
+    // Handle structure difference between booking (item.trip) and direct trip (item)
+    const trip = item.trip || item
+    const isBooking = !!item.trip
+
+    return (
+      <TouchableOpacity style={styles.tripCard}>
+        <View style={styles.tripHeader}>
+          <View style={styles.routeInfo}>
+            <Text style={styles.city}>{trip.from?.city || '?'}</Text>
+            <Ionicons name="arrow-forward" size={16} color={colors.dark[400]} />
+            <Text style={styles.city}>{trip.to?.city || '?'}</Text>
+          </View>
+          <View style={[styles.statusBadge, item.status === 'confirmed' && styles.statusConfirmed]}>
+            <Text style={[styles.statusText, item.status === 'confirmed' && styles.statusTextConfirmed]}>
+              {item.status === 'confirmed' ? 'Confirmé' : item.status || 'En attente'}
+            </Text>
+          </View>
         </View>
-        <View style={[styles.statusBadge, item.status === 'confirmed' && styles.statusConfirmed]}>
-          <Text style={[styles.statusText, item.status === 'confirmed' && styles.statusTextConfirmed]}>
-            {item.status === 'confirmed' ? 'Confirmé' : 'En attente'}
+
+        <View style={styles.tripDetails}>
+          <View style={styles.detail}>
+            <Ionicons name="calendar-outline" size={16} color={colors.dark[400]} />
+            <Text style={styles.detailText}>
+              {trip.departure?.date ? format(new Date(trip.departure.date), 'dd MMM', { locale: fr }) : '--'}
+            </Text>
+          </View>
+          <View style={styles.detail}>
+            <Ionicons name="time-outline" size={16} color={colors.dark[400]} />
+            <Text style={styles.detailText}>{trip.departure?.time}</Text>
+          </View>
+          <View style={styles.detail}>
+            <Ionicons name="people-outline" size={16} color={colors.dark[400]} />
+            <Text style={styles.detailText}>
+              {isBooking ? `${item.seats} place(s)` : `${trip.seats?.available} dispo`}
+            </Text>
+          </View>
+        </View>
+
+        <View style={styles.tripFooter}>
+          <Text style={styles.price}>
+            {isBooking ? item.totalPrice : trip.pricing?.perSeat} DZD
           </Text>
+          <Ionicons name="chevron-forward" size={20} color={colors.dark[400]} />
         </View>
-      </View>
-      
-      <View style={styles.tripDetails}>
-        <View style={styles.detail}>
-          <Ionicons name="calendar-outline" size={16} color={colors.dark[400]} />
-          <Text style={styles.detailText}>{item.date}</Text>
-        </View>
-        <View style={styles.detail}>
-          <Ionicons name="time-outline" size={16} color={colors.dark[400]} />
-          <Text style={styles.detailText}>{item.time}</Text>
-        </View>
-        <View style={styles.detail}>
-          <Ionicons name="people-outline" size={16} color={colors.dark[400]} />
-          <Text style={styles.detailText}>{item.seats} place(s)</Text>
-        </View>
-      </View>
-      
-      <View style={styles.tripFooter}>
-        <Text style={styles.price}>{item.price}</Text>
-        <Ionicons name="chevron-forward" size={20} color={colors.dark[400]} />
-      </View>
-    </TouchableOpacity>
-  )
+      </TouchableOpacity>
+    )
+  }
 
   return (
     <View style={styles.container}>
@@ -91,13 +125,24 @@ const TripsScreen = () => {
       </View>
 
       {/* Trips List */}
-      <FlatList
-        data={mockTrips}
-        renderItem={renderTrip}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
-        showsVerticalScrollIndicator={false}
-      />
+      {isLoading ? (
+        <View style={styles.centerLoading}>
+          <ActivityIndicator size="large" color={colors.primary[500]} />
+        </View>
+      ) : (
+        <FlatList
+          data={filteredData}
+          renderItem={renderItem}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View style={styles.emptyContainer}>
+              <Text style={styles.emptyText}>Aucun trajet trouvé</Text>
+            </View>
+          }
+        />
+      )}
     </View>
   )
 }
@@ -214,6 +259,19 @@ const styles = StyleSheet.create({
     fontSize: 18,
     fontWeight: 'bold',
     color: colors.primary[600],
+  },
+  centerLoading: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+  },
+  emptyContainer: {
+    padding: spacing.xl,
+    alignItems: 'center',
+  },
+  emptyText: {
+    color: colors.dark[500],
+    fontSize: 16,
   },
 })
 

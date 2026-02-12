@@ -1,56 +1,53 @@
-import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image } from 'react-native'
+import { View, Text, StyleSheet, FlatList, TouchableOpacity, Image, ActivityIndicator } from 'react-native'
 import { Ionicons } from '@expo/vector-icons'
+import { useQuery } from '@tanstack/react-query'
+import { chatApi } from '../../services/api'
 import { colors, spacing } from '../../constants/theme'
-
-const mockChats = [
-  {
-    id: '1',
-    name: 'Ahmed Benali',
-    avatar: 'https://i.pravatar.cc/150?img=1',
-    lastMessage: 'Je serai là dans 5 minutes',
-    time: '10:30',
-    unread: 2,
-  },
-  {
-    id: '2',
-    name: 'Karim Hadj',
-    avatar: 'https://i.pravatar.cc/150?img=2',
-    lastMessage: 'Merci pour le trajet!',
-    time: 'Hier',
-    unread: 0,
-  },
-  {
-    id: '3',
-    name: 'Sofia Merad',
-    avatar: 'https://i.pravatar.cc/150?img=5',
-    lastMessage: 'À quelle heure partez-vous?',
-    time: 'Lun',
-    unread: 1,
-  },
-]
+import { format } from 'date-fns'
+import { fr } from 'date-fns/locale'
 
 const MessagesScreen = () => {
-  const renderChat = ({ item }: { item: typeof mockChats[0] }) => (
-    <TouchableOpacity style={styles.chatItem}>
-      <Image source={{ uri: item.avatar }} style={styles.avatar} />
-      <View style={styles.chatContent}>
-        <View style={styles.chatHeader}>
-          <Text style={styles.name}>{item.name}</Text>
-          <Text style={styles.time}>{item.time}</Text>
+  const { data: chats, isLoading } = useQuery({
+    queryKey: ['chats'],
+    queryFn: async () => {
+      // Assuming GET /chats returns user's conversations
+      const response = await chatApi.getChats()
+      return response.data.data
+    },
+  })
+
+  const renderChat = ({ item }: { item: any }) => {
+    // Adapter for chat data structure
+    const otherUser = item.participants?.find((p: any) => p.id !== 'current-user-id') || item.otherUser || {} // Logic to find other user depends on API response structure
+    // Using fallback values for now as we don't know exact API shape
+
+    return (
+      <TouchableOpacity style={styles.chatItem}>
+        <Image
+          source={{ uri: otherUser.avatarUrl || `https://ui-avatars.com/api/?name=${otherUser.firstName || 'User'}` }}
+          style={styles.avatar}
+        />
+        <View style={styles.chatContent}>
+          <View style={styles.chatHeader}>
+            <Text style={styles.name}>{otherUser.firstName} {otherUser.lastName}</Text>
+            <Text style={styles.time}>
+              {item.lastMessage?.createdAt ? format(new Date(item.lastMessage.createdAt), 'HH:mm') : ''}
+            </Text>
+          </View>
+          <View style={styles.chatFooter}>
+            <Text style={styles.lastMessage} numberOfLines={1}>
+              {item.lastMessage?.content || 'Nouvelle conversation'}
+            </Text>
+            {item.unreadCount > 0 && (
+              <View style={styles.unreadBadge}>
+                <Text style={styles.unreadText}>{item.unreadCount}</Text>
+              </View>
+            )}
+          </View>
         </View>
-        <View style={styles.chatFooter}>
-          <Text style={styles.lastMessage} numberOfLines={1}>
-            {item.lastMessage}
-          </Text>
-          {item.unread > 0 && (
-            <View style={styles.unreadBadge}>
-              <Text style={styles.unreadText}>{item.unread}</Text>
-            </View>
-          )}
-        </View>
-      </View>
-    </TouchableOpacity>
-  )
+      </TouchableOpacity>
+    )
+  }
 
   return (
     <View style={styles.container}>
@@ -61,13 +58,24 @@ const MessagesScreen = () => {
         </TouchableOpacity>
       </View>
 
-      <FlatList
-        data={mockChats}
-        renderItem={renderChat}
-        keyExtractor={(item) => item.id}
-        contentContainerStyle={styles.list}
-        showsVerticalScrollIndicator={false}
-      />
+      {isLoading ? (
+        <View style={styles.center}>
+          <ActivityIndicator size="large" color={colors.primary[500]} />
+        </View>
+      ) : (
+        <FlatList
+          data={chats || []}
+          renderItem={renderChat}
+          keyExtractor={(item) => item.id}
+          contentContainerStyle={styles.list}
+          showsVerticalScrollIndicator={false}
+          ListEmptyComponent={
+            <View style={styles.center}>
+              <Text style={styles.emptyText}>Aucun message</Text>
+            </View>
+          }
+        />
+      )}
     </View>
   )
 }
@@ -155,6 +163,16 @@ const styles = StyleSheet.create({
     fontSize: 12,
     color: 'white',
     fontWeight: '600',
+  },
+  center: {
+    flex: 1,
+    justifyContent: 'center',
+    alignItems: 'center',
+    marginTop: 50,
+  },
+  emptyText: {
+    color: colors.dark[500],
+    fontSize: 16,
   },
 })
 

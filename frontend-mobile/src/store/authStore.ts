@@ -21,7 +21,7 @@ interface AuthState {
   accessToken: string | null
   refreshToken: string | null
   hasSeenOnboarding: boolean
-  
+
   // Actions
   setUser: (user: User | null) => void
   setTokens: (accessToken: string, refreshToken: string) => void
@@ -44,9 +44,9 @@ export const useAuthStore = create<AuthState>()(
       hasSeenOnboarding: false,
 
       setUser: (user) => set({ user, isAuthenticated: !!user }),
-      
+
       setTokens: (accessToken, refreshToken) => set({ accessToken, refreshToken }),
-      
+
       login: (user, accessToken, refreshToken) => set({
         user,
         isAuthenticated: true,
@@ -54,7 +54,7 @@ export const useAuthStore = create<AuthState>()(
         refreshToken,
         isLoading: false,
       }),
-      
+
       logout: () => set({
         user: null,
         isAuthenticated: false,
@@ -62,11 +62,11 @@ export const useAuthStore = create<AuthState>()(
         refreshToken: null,
         isLoading: false,
       }),
-      
+
       updateUser: (updates) => set((state) => ({
         user: state.user ? { ...state.user, ...updates } : null,
       })),
-      
+
       setLoading: (isLoading) => set({ isLoading }),
 
       setHasSeenOnboarding: (value) => set({ hasSeenOnboarding: value }),
@@ -84,6 +84,13 @@ export const useAuthStore = create<AuthState>()(
     {
       name: 'auth-storage',
       storage: createJSONStorage(() => AsyncStorage),
+      onRehydrateStorage: (state) => {
+        return (rehydratedState) => {
+          if (rehydratedState) {
+            rehydratedState.setLoading(false)
+          }
+        }
+      },
       partialize: (state) => ({
         user: state.user,
         isAuthenticated: state.isAuthenticated,
