@@ -322,27 +322,52 @@ tripsRouter.get('/search', optionalAuth, async (req, res) => {
     try {
         const { fromWilayaId, toWilayaId, date, seats, page = 1, limit = 20 } = req.query;
 
+        // Base query with official "Engineer Level" visibility rules
         let query = db('trips')
-            .where({ status: 'active' })
-            .where('departure_time', '>', new Date());
-
-        if (fromWilayaId) query = query.where('from_wilaya_id', fromWilayaId);
-        if (toWilayaId) query = query.where('to_wilaya_id', toWilayaId);
-        if (date) query = query.whereRaw('DATE(departure_time) = ?', [date]);
-        if (seats) query = query.where('available_seats', '>=', seats);
-
-        const total = await query.clone().count('* as count').first();
-        const trips = await query
-            .select('trips.*', db.raw("users.first_name || ' ' || users.last_name as driver_name"), 'users.avatar_url', 'users.is_verified as driver_verified')
             .join('users', 'trips.driver_id', 'users.id')
+            .select(
+                'trips.*',
+                db.raw("users.first_name || ' ' || users.last_name as driver_name"),
+                'users.avatar_url',
+                'users.is_verified as driver_verified',
+                'users.status as driver_status'
+            )
+            .where({
+                'trips.status': 'active', // Only show active trips
+                'users.is_active': true,   // Driver must be active
+            })
+            .whereIn('users.status', ['active', 'verified']) // Driver must not be suspended
+            .where('trips.departure_time', '>', new Date()); // Not yet departed (Rule 9)
+
+        if (fromWilayaId) query = query.where('trips.from_wilaya_id', fromWilayaId);
+        if (toWilayaId) query = query.where('trips.to_wilaya_id', toWilayaId);
+        if (date) query = query.whereRaw('DATE(trips.departure_time) = ?', [date]);
+
+        // We REMOVE the available_seats check here to allow "FULL" trips to be visible (Mode Complet mais visible)
+        // We will mark them as full in the logic or frontend.
+
+        // Create a count query by cloning the base query and clearing conflicting selects
+        const totalResult = await query.clone()
+            .clearSelect() // Critical for Postgres count
+            .clearOrder()
+            .count('* as count')
+            .first();
+
+        const trips = await query
             .limit(parseInt(limit))
             .offset((parseInt(page) - 1) * parseInt(limit))
-            .orderBy('departure_time', 'asc');
+            .orderBy('trips.departure_time', 'asc');
 
-        ResponseUtil.paginated(res, trips, {
+        // Add display flags for the frontend (Rule 6)
+        const enrichedTrips = trips.map(trip => ({
+            ...trip,
+            displayStatus: trip.available_seats > 0 ? 'VISIBLE & BOOKABLE' : 'VISIBLE BUT FULL'
+        }));
+
+        ResponseUtil.paginated(res, enrichedTrips, {
             page: parseInt(page),
             limit: parseInt(limit),
-            total: parseInt(total?.count || 0)
+            total: parseInt(totalResult?.count || 0)
         });
     } catch (error) {
         console.error('Trip search error:', error);
@@ -463,9 +488,24 @@ const bookingsRouter = express.Router();
 // POST /api/bookings
 bookingsRouter.post('/', authenticate, async (req, res) => {
     try {
+        const { trip_id, num_seats = 1 } = req.body;
+
+        // 1. Check if trip exists and has enough seats
+        const trip = await db('trips').where({ id: trip_id }).first();
+        if (!trip) {
+            return ResponseUtil.notFound(res, 'Trip not found');
+        }
+
+        // We check against available_seats. Even for pending bookings, 
+        // it's good to know if there's any chance.
+        if (trip.available_seats < num_seats) {
+            return ResponseUtil.badRequest(res, 'Not enough seats available on this trip');
+        }
+
         const bookingData = {
             ...req.body,
             passenger_id: req.user.userId,
+            num_seats: num_seats,
             status: 'pending',
             created_at: new Date(),
             updated_at: new Date()
@@ -569,46 +609,85 @@ bookingsRouter.post('/:id/confirm-payment', authenticate, async (req, res) => {
 bookingsRouter.patch('/:id/status', authenticate, async (req, res) => {
     try {
         const { status } = req.body;
+        const bookingId = req.params.id;
         const validStatuses = ['confirmed', 'rejected', 'cancelled', 'completed'];
 
         if (!validStatuses.includes(status)) {
             return ResponseUtil.badRequest(res, 'Invalid status');
         }
 
-        // Check if the user is the driver of the trip for this booking
-        const booking = await db('bookings')
-            .join('trips', 'bookings.trip_id', 'trips.id')
-            .where('bookings.id', req.params.id)
-            .select('bookings.*', 'trips.driver_id')
-            .first();
+        // Use a transaction to ensure seat counts and statuses are perfectly synced
+        const result = await db.transaction(async (trx) => {
+            // Get booking with trip details (locked for update in some DBs, but simple select here)
+            const booking = await trx('bookings')
+                .join('trips', 'bookings.trip_id', 'trips.id')
+                .where('bookings.id', bookingId)
+                .select(
+                    'bookings.*',
+                    'trips.driver_id',
+                    'trips.available_seats',
+                    'trips.total_seats'
+                )
+                .first();
 
-        if (!booking) {
-            return ResponseUtil.notFound(res, 'Booking not found');
-        }
+            if (!booking) {
+                throw new Error('BOOKING_NOT_FOUND');
+            }
 
-        if (booking.driver_id !== req.user.userId) {
-            return ResponseUtil.unauthorized(res, 'Only the driver can update the booking status');
-        }
+            if (booking.driver_id !== req.user.userId) {
+                throw new Error('UNAUTHORIZED');
+            }
 
-        const [updatedBooking] = await db('bookings')
-            .where({ id: req.params.id })
-            .update({
-                status: status,
-                updated_at: new Date()
-            })
-            .returning('*');
+            const currentStatus = booking.status;
 
-        // If confirmed, update available seats in trip
-        if (status === 'confirmed') {
-            await db('trips')
-                .where({ id: booking.trip_id })
-                .decrement('available_seats', booking.num_seats);
-        }
+            // If status is the same, do nothing
+            if (currentStatus === status) {
+                return booking;
+            }
 
-        ResponseUtil.success(res, updatedBooking, `Booking ${status} successfully`);
+            // SEAT MANAGEMENT LOGIC
+            // ---------------------
+
+            // 1. Moving TO 'confirmed' from something else: Decrement seats
+            if (status === 'confirmed' && currentStatus !== 'confirmed') {
+                if (booking.available_seats < booking.num_seats) {
+                    throw new Error('OVERBOOKING');
+                }
+                await trx('trips')
+                    .where({ id: booking.trip_id })
+                    .decrement('available_seats', booking.num_seats);
+            }
+
+            // 2. Moving AWAY from 'confirmed' (to rejected or cancelled): Increment seats back
+            if (currentStatus === 'confirmed' && (status === 'rejected' || status === 'cancelled')) {
+                // Ensure we don't exceed total_seats (safety check)
+                const newAvailable = Math.min(booking.available_seats + booking.num_seats, booking.total_seats);
+                await trx('trips')
+                    .where({ id: booking.trip_id })
+                    .update({ available_seats: newAvailable });
+            }
+
+            // Update the booking status
+            const [updated] = await trx('bookings')
+                .where({ id: bookingId })
+                .update({
+                    status: status,
+                    updated_at: new Date()
+                })
+                .returning('*');
+
+            return updated;
+        });
+
+        ResponseUtil.success(res, result, `Réservation ${status} avec succès`);
     } catch (error) {
         console.error('Update booking status error:', error);
-        ResponseUtil.error(res, 'Failed to update booking status');
+
+        if (error.message === 'BOOKING_NOT_FOUND') return ResponseUtil.notFound(res, 'Réservation non trouvée');
+        if (error.message === 'UNAUTHORIZED') return ResponseUtil.unauthorized(res, 'Seul le conducteur peut modifier ce statut');
+        if (error.message === 'OVERBOOKING') return ResponseUtil.badRequest(res, 'Plus assez de places disponibles pour ce trajet');
+
+        ResponseUtil.error(res, 'Échec de la mise à jour : ' + error.message);
     }
 });
 
@@ -1081,7 +1160,6 @@ driverRouter.get('/stats', authenticate, async (req, res) => {
         // 4. Upcoming Trips
         const upcomingTrips = await db('trips')
             .where('driver_id', driverId)
-            .where('departure_time', '>', new Date())
             .whereIn('status', ['active', 'scheduled'])
             .orderBy('departure_time', 'asc')
             .limit(5);
@@ -1401,11 +1479,42 @@ app.use((err, req, res, next) => {
 });
 
 // ============================================
-// Server Start
+// Trip Status Scheduler (Rule 5)
 // ============================================
+const startTripStatusScheduler = () => {
+    console.log('--- ⏱️ SCHEDULER: Advanced Trip Lifecycle Active ---');
+
+    // Check every 2 minutes
+    setInterval(async () => {
+        try {
+            const now = new Date();
+
+            // 🔹 Rule 5: Pass to IN_PROGRESS when departure time arrives
+            const started = await db('trips')
+                .where('status', 'active')
+                .where('departure_time', '<=', now)
+                .update({ status: 'in_progress', updated_at: now });
+
+            if (started > 0) console.log(`[SCHEDULER] ${started} trips -> IN_PROGRESS`);
+
+            // 🔹 Rule 10: Pass to FINISHED after a reasonable duration (e.g., 6 hours after departure)
+            const finished = await db('trips')
+                .whereIn('status', ['active', 'in_progress'])
+                .whereRaw("departure_time + interval '6 hours' <= ?", [now])
+                .update({ status: 'completed', updated_at: now });
+
+            if (finished > 0) console.log(`[SCHEDULER] ${finished} trips -> FINISHED`);
+
+        } catch (error) {
+            console.error('[SCHEDULER] Error updating trip statuses:', error);
+        }
+    }, 2 * 60 * 1000);
+};
+
 const PORT = process.env.PORT || 5000;
 
 httpServer.listen(PORT, () => {
+    startTripStatusScheduler(); // Start the background logic
     console.log(`
 ╔══════════════════════════════════════════════╗
 ║     🚗 RohWinBghit Backend Server 🚗        ║

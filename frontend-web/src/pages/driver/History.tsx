@@ -149,9 +149,15 @@ const TripHistory: React.FC = () => {
                                                 </div>
                                             </td>
                                             <td className="px-8 py-6 text-center">
-                                                <div className="inline-flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-2xl w-10 h-10 text-xs font-black">
-                                                    {trip.total_seats - trip.available_seats}/{trip.total_seats}
-                                                </div>
+                                                {trip.available_seats === 0 ? (
+                                                    <div className="inline-flex items-center justify-center px-4 py-2 bg-red-500/10 text-red-500 border border-red-500/20 rounded-xl text-[10px] font-black uppercase tracking-widest shadow-sm">
+                                                        COMPLET
+                                                    </div>
+                                                ) : (
+                                                    <div className="inline-flex items-center justify-center bg-slate-100 dark:bg-slate-800 text-slate-700 dark:text-slate-300 rounded-2xl w-10 h-10 text-xs font-black">
+                                                        {trip.total_seats - trip.available_seats}/{trip.total_seats}
+                                                    </div>
+                                                )}
                                             </td>
                                             <td className="px-8 py-6">
                                                 <span className="font-black text-slate-900 dark:text-white tracking-tight">{(trip.total_seats - trip.available_seats) * trip.price_per_seat} DZD</span>

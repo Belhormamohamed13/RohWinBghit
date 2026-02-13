@@ -16,7 +16,7 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ children, fullContent = fal
         { icon: 'grid_view', label: 'Tableau de bord', path: '/driver/dashboard' },
         { icon: 'add_circle', label: 'Proposer un trajet', path: '/driver/publish' },
         { icon: 'directions_car', label: 'Mon Véhicule', path: '/driver/vehicles' },
-        { icon: 'history', label: 'Mes Trajets', path: '/driver/history' },
+        { icon: 'history', label: 'Mes Trajets', path: '/driver/my-trips' },
         { icon: 'account_balance_wallet', label: 'Portefeuille', path: '/driver/wallet' },
         { icon: 'forum', label: 'Messages', path: '/driver/messages' },
         { icon: 'verified_user', label: 'Vérification', path: '/driver/verification' },

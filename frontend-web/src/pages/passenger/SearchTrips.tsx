@@ -224,14 +224,17 @@ const SearchTrips: React.FC = () => {
 
                                     <div className="flex flex-row md:flex-col justify-between items-end gap-4 w-full md:w-auto md:min-w-[150px] md:border-l-2 md:border-dashed md:border-slate-200 dark:md:border-slate-800 md:pl-10">
                                         <div className="text-right">
-                                            <p className="text-3xl font-black text-primary tracking-tighter">{trip.price_per_seat}<span className="text-sm ml-1 opacity-60">DZD</span></p>
-                                            <p className="text-[10px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-[0.2em] mt-1">PAR SIÈGE</p>
+                                            <p className={`text-3xl font-black tracking-tighter ${trip.available_seats === 0 ? 'text-red-500' : 'text-primary'}`}>{trip.price_per_seat}<span className="text-sm ml-1 opacity-60">DZD</span></p>
+                                            <p className="text-[10px] text-slate-400 dark:text-slate-500 font-black uppercase tracking-[0.2em] mt-1">
+                                                {trip.available_seats === 0 ? 'COMPLET' : 'PAR SIÈGE'}
+                                            </p>
                                         </div>
                                         <button
+                                            disabled={trip.available_seats === 0}
                                             onClick={() => navigate(`/passenger/trips/${trip.id}`)}
-                                            className="bg-slate-900 dark:bg-white text-white dark:text-slate-900 font-black px-8 py-3 rounded-2xl text-sm shadow-xl hover:scale-105 transition-all"
+                                            className={`font-black px-8 py-3 rounded-2xl text-sm shadow-xl transition-all ${trip.available_seats === 0 ? 'bg-slate-200 dark:bg-slate-800 text-slate-400 cursor-not-allowed' : 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 hover:scale-105'}`}
                                         >
-                                            Réserver
+                                            {trip.available_seats === 0 ? 'Complet' : 'Réserver'}
                                         </button>
                                     </div>
                                 </div>

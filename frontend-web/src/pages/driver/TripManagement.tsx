@@ -1,3 +1,4 @@
+import React, { useState } from 'react';
 import { useParams, useNavigate } from 'react-router-dom';
 import { useQuery, useMutation, useQueryClient } from '@tanstack/react-query';
 import { tripsApi, bookingsApi, wilayasApi } from '../../services/api';
@@ -47,18 +48,33 @@ const TripManagement = () => {
         }
     });
 
+
     const updateStatusMutation = useMutation({
         mutationFn: ({ bookingId, status }: { bookingId: string, status: string }) =>
             bookingsApi.updateStatus(bookingId, status),
-        onSuccess: (_, variables) => {
-            toast.success(`Réservation ${variables.status === 'confirmed' ? 'acceptée' : 'refusée'}`);
+        onSuccess: (_response, variables) => {
+            if (variables.status === 'confirmed') {
+                toast.success(
+                    () => (
+                        <div className="flex flex-col gap-1">
+                            <span className="font-bold text-slate-900">Réservation acceptée ! ✅</span>
+                            <span className="text-xs text-slate-500">Un nouveau passager rejoint votre trajet. Pensez à le contacter via le chat.</span>
+                        </div>
+                    ),
+                    { duration: 5000 }
+                );
+            } else {
+                toast.success(`Réservation ${variables.status === 'rejected' ? 'refusée' : 'mise à jour'}`);
+            }
             queryClient.invalidateQueries({ queryKey: ['trip-bookings', id] });
             queryClient.invalidateQueries({ queryKey: ['trip-manage', id] });
         },
-        onError: () => {
-            toast.error('Erreur lors de la mise à jour');
+        onError: (error: any) => {
+            const message = error.response?.data?.message || 'Erreur lors de la mise à jour';
+            toast.error(message);
         }
     });
+
 
     if (tripLoading || bookingsLoading) return <LoadingSpinner fullScreen />;
     if (!trip) return <div className="text-center py-20">Trajet non trouvé</div>;
@@ -184,7 +200,13 @@ const TripManagement = () => {
                                         {booking.status === 'pending' && (
                                             <>
                                                 <button
-                                                    onClick={() => updateStatusMutation.mutate({ bookingId: booking.id, status: 'confirmed' })}
+                                                    onClick={() => {
+                                                        if (trip.available_seats < booking.num_seats) {
+                                                            toast.error('Nombre de places insuffisant !');
+                                                            return;
+                                                        }
+                                                        updateStatusMutation.mutate({ bookingId: booking.id, status: 'confirmed' });
+                                                    }}
                                                     disabled={updateStatusMutation.isPending}
                                                     className="flex items-center gap-2 px-6 py-3 bg-primary text-slate-900 rounded-xl text-xs font-black uppercase tracking-widest hover:scale-105 active:scale-95 transition-all shadow-lg"
                                                 >
@@ -219,6 +241,7 @@ const TripManagement = () => {
                         </div>
                     )}
                 </div>
+
             </div>
         </DriverLayout>
     );

@@ -176,11 +176,16 @@ const DriverDashboard: React.FC = () => {
                                                             +1
                                                         </div>
                                                     </div>
-                                                    <div className="h-1.5 w-full bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden p-[1px] max-w-[120px]">
-                                                        <div
-                                                            className="h-full bg-[#13ec6d] rounded-full shadow-lg"
-                                                            style={{ width: `${(trip.passengersCount / trip.total_seats) * 100}%` }}
-                                                        ></div>
+                                                    <div className="flex items-center gap-2">
+                                                        <div className={`h-1.5 w-24 bg-slate-100 dark:bg-slate-800 rounded-full overflow-hidden p-[1px]`}>
+                                                            <div
+                                                                className={`h-full ${trip.available_seats === 0 ? 'bg-red-500' : 'bg-[#13ec6d]'} rounded-full shadow-lg transition-all duration-500`}
+                                                                style={{ width: `${Math.min(100, ((trip.total_seats - trip.available_seats) / (trip.total_seats || 1)) * 100)}%` }}
+                                                            ></div>
+                                                        </div>
+                                                        <span className={`text-[9px] font-black uppercase tracking-tighter ${trip.available_seats === 0 ? 'text-red-500' : 'text-slate-400'}`}>
+                                                            {trip.available_seats === 0 ? 'COMPLET' : `${trip.available_seats} DISPOS`}
+                                                        </span>
                                                     </div>
                                                 </div>
                                             </td>

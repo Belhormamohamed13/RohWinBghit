@@ -343,13 +343,18 @@ const Results = () => {
                                                 <span className="text-[10px] font-black text-slate-400 uppercase tracking-widest italic">DZD / Place</span>
                                             </div>
 
-                                            <div className="flex items-center gap-2 mt-2 px-6 py-2 bg-primary/10 border border-primary/20 rounded-2xl">
-                                                <span className="w-1.5 h-1.5 rounded-full bg-primary animate-pulse"></span>
-                                                <span className="text-[10px] font-black text-primary uppercase tracking-widest italic">{trip.available_seats} places libres</span>
+                                            <div className={`flex items-center gap-2 mt-2 px-6 py-2 rounded-2xl ${trip.available_seats === 0 ? 'bg-red-500/10 border border-red-500/20' : 'bg-primary/10 border border-primary/20'}`}>
+                                                <span className={`w-1.5 h-1.5 rounded-full ${trip.available_seats === 0 ? 'bg-red-500' : 'bg-primary animate-pulse'}`}></span>
+                                                <span className={`text-[10px] font-black uppercase tracking-widest italic ${trip.available_seats === 0 ? 'text-red-500' : 'text-primary'}`}>
+                                                    {trip.available_seats === 0 ? 'COMPLET' : `${trip.available_seats} places libres`}
+                                                </span>
                                             </div>
 
-                                            <button className="hidden lg:flex w-full bg-primary hover:bg-primary/90 text-slate-900 font-black py-4 px-6 rounded-2xl transition-all items-center justify-center gap-3 shadow-xl shadow-primary/10 uppercase tracking-widest text-[10px] mt-4">
-                                                Réserver
+                                            <button
+                                                disabled={trip.available_seats === 0}
+                                                className={`hidden lg:flex w-full font-black py-4 px-6 rounded-2xl transition-all items-center justify-center gap-3 shadow-xl uppercase tracking-widest text-[10px] mt-4 ${trip.available_seats === 0 ? 'bg-slate-100 dark:bg-slate-800 text-slate-400 cursor-not-allowed' : 'bg-primary hover:bg-primary/90 text-slate-900 shadow-primary/10'}`}
+                                            >
+                                                {trip.available_seats === 0 ? 'COMPLET' : 'Réserver'}
                                                 <ArrowRight className="w-4 h-4" />
                                             </button>
                                         </div>
