@@ -200,13 +200,11 @@ const MyBookings: React.FC = () => {
                                             ) : booking.status !== 'cancelled' ? (
                                                 <button
                                                     onClick={async () => {
-                                                        if (window.confirm('Êtes-vous sûr de vouloir annuler cette réservation ? des pénalités peuvent s\'appliquer selon le délai.')) {
-                                                            try {
-                                                                await bookingsApi.cancel(booking.id, 'Annulation par le passager');
-                                                                window.location.reload();
-                                                            } catch (error) {
-                                                                alert('Erreur lors de l\'annulation');
-                                                            }
+                                                        try {
+                                                            await bookingsApi.cancel(booking.id, 'Annulation par le passager');
+                                                            window.location.reload();
+                                                        } catch (error) {
+                                                            alert('Erreur lors de l\'annulation');
                                                         }
                                                     }}
                                                     className="bg-red-500/10 hover:bg-red-500 hover:text-white text-red-500 py-4 rounded-2xl text-[10px] font-black uppercase tracking-widest transition-all active:scale-95 border border-red-500/20"
