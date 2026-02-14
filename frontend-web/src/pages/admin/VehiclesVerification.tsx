@@ -1,13 +1,11 @@
-import { motion } from 'framer-motion'
+import { motion, AnimatePresence } from 'framer-motion'
 import {
     Car,
     CheckCircle,
     XCircle,
     FileText,
-    ExternalLink,
     AlertCircle,
     ShieldCheck,
-    Calendar,
     User,
     ArrowRight
 } from 'lucide-react'

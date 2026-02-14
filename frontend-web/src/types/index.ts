@@ -300,3 +300,169 @@ export interface BookingFormData {
   specialRequests?: string
   paymentMethod: string
 }
+
+// ============================================
+// API Request Types (for services)
+// ============================================
+
+// Auth
+export interface LoginRequest {
+  email: string
+  password: string
+}
+
+export interface RegisterRequest {
+  firstName: string
+  lastName: string
+  email: string
+  phone?: string
+  password: string
+  role?: 'passenger' | 'driver'
+}
+
+export interface RefreshTokenRequest {
+  refreshToken: string
+}
+
+// Trip - driverId is optional since backend adds it from auth token
+export interface CreateTripRequest {
+  driverId?: string
+  vehicleId: string
+  fromWilayaId: number
+  fromCity: string
+  fromAddress?: string
+  fromLatitude?: number
+  fromLongitude?: number
+  toWilayaId: number
+  toCity: string
+  toAddress?: string
+  toLatitude?: number
+  toLongitude?: number
+  departureDate: string
+  departureTime: string
+  estimatedArrival?: string
+  distanceKm?: number
+  durationMinutes?: number
+  availableSeats: number
+  pricePerSeat: number
+  totalPrice?: number
+  pricingStrategy?: 'standard' | 'dynamic'
+  luggageAllowed?: boolean
+  maxLuggageSize?: string
+  smokingAllowed?: boolean
+  petsAllowed?: boolean
+  instantBooking?: boolean
+  description?: string
+}
+
+export interface UpdateTripRequest {
+  departureDate?: string
+  departureTime?: string
+  availableSeats?: number
+  pricePerSeat?: number
+  description?: string
+  luggageAllowed?: boolean
+  smokingAllowed?: boolean
+  petsAllowed?: boolean
+  instantBooking?: boolean
+  status?: 'active' | 'completed' | 'cancelled'
+}
+
+export interface TripSearchParams {
+  fromWilayaId?: number
+  toWilayaId?: number
+  date?: string
+  seats?: number
+  page?: number
+  limit?: number
+}
+
+// Booking - accepts both camelCase and snake_case for backend compatibility
+export interface CreateBookingRequest {
+  trip_id?: string
+  tripId?: string
+  passenger_id?: string
+  passengerId?: string
+  numSeats?: number
+  num_seats?: number
+  totalPrice?: number
+  total_price?: number
+  paymentMethod?: string
+  payment_method?: string
+}
+
+export interface ConfirmPaymentRequest {
+  paymentMethod: string
+  paymentIntentId?: string
+}
+
+// Vehicle - accepts both camelCase and snake_case for backend compatibility
+export interface CreateVehicleRequest {
+  owner_id?: string
+  ownerId?: string
+  make: string
+  model: string
+  year: number
+  color: string
+  license_plate_encrypted?: string
+  licensePlate?: string
+  vehicleType?: string
+  vehicle_type?: string
+  seats?: number
+  luggage_capacity?: number
+  luggageCapacity?: number
+  features?: Record<string, boolean>
+  image_url?: string
+  imageUrl?: string
+  condition?: string
+}
+
+export interface UpdateVehicleRequest {
+  make?: string
+  model?: string
+  year?: number
+  color?: string
+  license_plate_encrypted?: string
+  licensePlate?: string
+  vehicleType?: string
+  vehicle_type?: string
+  seats?: number
+  luggage_capacity?: number
+  luggageCapacity?: number
+  features?: Record<string, boolean>
+  image_url?: string
+  imageUrl?: string
+  condition?: string
+}
+
+// Payment
+export interface ProcessPaymentRequest {
+  amount: number
+  currency?: string
+  paymentMethod: string
+  bookingId: string
+  customerId?: string
+}
+
+export interface CreatePaymentIntentRequest {
+  amount: number
+  currency?: string
+  bookingId: string
+}
+
+// Review
+export interface CreateReviewRequest {
+  bookingId: string
+  tripId: string
+  revieweeId: string
+  rating: number
+  comment?: string
+}
+
+// User
+export interface UpdateProfileRequest {
+  firstName?: string
+  lastName?: string
+  phone?: string
+  avatarUrl?: string
+}

@@ -4,9 +4,18 @@
  */
 
 const jwt = require('jsonwebtoken');
+const tokenBlacklist = require('./token-blacklist');
 
-const JWT_SECRET = process.env.JWT_SECRET || 'your_jwt_secret_key';
-const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET || 'your_refresh_secret_key';
+// Validate required environment variables at startup
+if (!process.env.JWT_SECRET) {
+  throw new Error('FATAL: JWT_SECRET environment variable is required');
+}
+if (!process.env.JWT_REFRESH_SECRET) {
+  throw new Error('FATAL: JWT_REFRESH_SECRET environment variable is required');
+}
+
+const JWT_SECRET = process.env.JWT_SECRET;
+const JWT_REFRESH_SECRET = process.env.JWT_REFRESH_SECRET;
 const JWT_EXPIRES_IN = process.env.JWT_EXPIRES_IN || '15m';
 const JWT_REFRESH_EXPIRES_IN = process.env.JWT_REFRESH_EXPIRES_IN || '7d';
 
@@ -125,6 +134,26 @@ class JWTUtil {
     const exp = this.getExpirationTime(token);
     if (!exp) return 0;
     return Math.max(0, exp * 1000 - Date.now());
+  }
+
+  /**
+   * Blacklist a token (for logout)
+   * @param {string} token - JWT token to blacklist
+   */
+  static blacklist(token) {
+    const expirySeconds = this.getTimeUntilExpiration(token) / 1000;
+    if (expirySeconds > 0) {
+      tokenBlacklist.add(token, expirySeconds);
+    }
+  }
+
+  /**
+   * Check if token is blacklisted
+   * @param {string} token - JWT token to check
+   * @returns {boolean} True if token is blacklisted
+   */
+  static isBlacklisted(token) {
+    return tokenBlacklist.has(token);
   }
 }
 

@@ -60,13 +60,29 @@ const chatModel = new ChatModel(db);
 // Security headers
 app.use(helmet());
 
-// CORS
-app.use(cors({
-    origin: process.env.CORS_ORIGIN || ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:3001', 'http://localhost:19006'],
+// CORS - Production-safe configuration
+const corsOptions = {
     credentials: true,
     methods: ['GET', 'POST', 'PUT', 'DELETE', 'PATCH'],
     allowedHeaders: ['Content-Type', 'Authorization']
-}));
+};
+
+// Configure origin based on environment
+const allowedOrigins = process.env.CORS_ORIGIN ? process.env.CORS_ORIGIN.split(',') : [];
+const isProduction = process.env.NODE_ENV === 'production';
+
+if (isProduction) {
+    // In production, only allow explicitly configured origins
+    if (allowedOrigins.length === 0) {
+        console.warn('WARNING: Running in production without CORS_ORIGIN set - requests will be blocked');
+    }
+    corsOptions.origin = allowedOrigins.length > 0 ? allowedOrigins : false;
+} else {
+    // In development, allow localhost origins
+    corsOptions.origin = ['http://localhost:5173', 'http://localhost:3000', 'http://localhost:3001', 'http://localhost:19006'];
+}
+
+app.use(cors(corsOptions));
 
 // Body parsing
 app.use(express.json({ limit: '10mb' }));
@@ -136,6 +152,12 @@ const authenticate = (req, res, next) => {
         }
 
         const token = authHeader.split(' ')[1];
+
+        // Check if token is blacklisted
+        if (JWTUtil.isBlacklisted(token)) {
+            return ResponseUtil.unauthorized(res, 'Token has been revoked');
+        }
+
         const decoded = JWTUtil.verifyAccessToken(token);
         req.user = decoded;
         next();
@@ -149,7 +171,11 @@ const optionalAuth = (req, res, next) => {
         const authHeader = req.headers.authorization;
         if (authHeader && authHeader.startsWith('Bearer ')) {
             const token = authHeader.split(' ')[1];
-            req.user = JWTUtil.verifyAccessToken(token);
+
+            // Check if token is blacklisted
+            if (!JWTUtil.isBlacklisted(token)) {
+                req.user = JWTUtil.verifyAccessToken(token);
+            }
         }
     } catch (error) {
         // Token invalid, continue without auth
@@ -306,8 +332,18 @@ authRouter.post('/reset-password', async (req, res) => {
 
 // POST /api/auth/logout
 authRouter.post('/logout', authenticate, (req, res) => {
-    // In production, invalidate the token
-    ResponseUtil.success(res, null, 'Logged out successfully');
+    try {
+        // Get the token from authorization header
+        const authHeader = req.headers.authorization;
+        if (authHeader && authHeader.startsWith('Bearer ')) {
+            const token = authHeader.split(' ')[1];
+            // Blacklist the token
+            JWTUtil.blacklist(token);
+        }
+        ResponseUtil.success(res, null, 'Logged out successfully');
+    } catch (error) {
+        ResponseUtil.error(res, 'Logout failed');
+    }
 });
 
 app.use(`${apiPrefix}/auth`, authRouter);
@@ -714,9 +750,17 @@ wilayasRouter.get('/', async (req, res) => {
 wilayasRouter.get('/search', async (req, res) => {
     try {
         const { q } = req.query;
+
+        // Validate and sanitize input
+        if (!q || typeof q !== 'string' || q.length > 100) {
+            return ResponseUtil.badRequest(res, 'Invalid search query');
+        }
+
+        // Use parameterized query to prevent SQL injection
+        const searchTerm = `%${q}%`;
         const wilayas = await db('wilayas')
-            .where('name_fr', 'ilike', `%${q}%`)
-            .orWhere('name_ar', 'ilike', `%${q}%`)
+            .where('name_fr', 'ilike', searchTerm)
+            .orWhere('name_ar', 'ilike', searchTerm)
             .orderBy('code', 'asc');
 
         ResponseUtil.success(res, wilayas, 'Wilayas search results');

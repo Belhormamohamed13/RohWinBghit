@@ -14,9 +14,15 @@ class EncryptionService {
     this.saltLength = 64;
     this.iterations = 100000;
     this.digest = 'sha512';
-    
-    // Master key from environment
-    this.masterKey = process.env.ENCRYPTION_KEY || 'default_master_key_32_chars_long!!';
+
+    // Master key from environment - must be 32 characters for AES-256
+    if (!process.env.ENCRYPTION_KEY) {
+      throw new Error('FATAL: ENCRYPTION_KEY environment variable is required');
+    }
+    if (process.env.ENCRYPTION_KEY.length < 32) {
+      throw new Error('FATAL: ENCRYPTION_KEY must be at least 32 characters');
+    }
+    this.masterKey = process.env.ENCRYPTION_KEY;
   }
 
   /**
@@ -47,23 +53,23 @@ class EncryptionService {
 
       // Generate random salt
       const salt = crypto.randomBytes(this.saltLength);
-      
+
       // Derive key
       const key = this.deriveKey(keyOverride || this.masterKey, salt);
-      
+
       // Generate random IV
       const iv = crypto.randomBytes(this.ivLength);
-      
+
       // Create cipher
       const cipher = crypto.createCipheriv(this.algorithm, key, iv);
-      
+
       // Encrypt
       let encrypted = cipher.update(text, 'utf8', 'hex');
       encrypted += cipher.final('hex');
-      
+
       // Get auth tag
       const authTag = cipher.getAuthTag();
-      
+
       // Combine salt + iv + authTag + encrypted for storage
       return {
         encrypted: encrypted,
@@ -88,23 +94,23 @@ class EncryptionService {
       if (!encryptedData || !encryptedData.encrypted) return null;
 
       const { encrypted, iv, authTag, salt } = encryptedData;
-      
+
       // Convert from hex
       const ivBuffer = Buffer.from(iv, 'hex');
       const authTagBuffer = Buffer.from(authTag, 'hex');
       const saltBuffer = Buffer.from(salt, 'hex');
-      
+
       // Derive key
       const key = this.deriveKey(keyOverride || this.masterKey, saltBuffer);
-      
+
       // Create decipher
       const decipher = crypto.createDecipheriv(this.algorithm, key, ivBuffer);
       decipher.setAuthTag(authTagBuffer);
-      
+
       // Decrypt
       let decrypted = decipher.update(encrypted, 'hex', 'utf8');
       decrypted += decipher.final('utf8');
-      
+
       return decrypted;
     } catch (error) {
       console.error('Decryption error:', error);
@@ -157,11 +163,11 @@ class EncryptionService {
     const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZabcdefghijklmnopqrstuvwxyz0123456789';
     let result = '';
     const randomBytes = crypto.randomBytes(length);
-    
+
     for (let i = 0; i < length; i++) {
       result += chars[randomBytes[i] % chars.length];
     }
-    
+
     return result;
   }
 
@@ -178,11 +184,11 @@ class EncryptionService {
       s: bookingData.seats,
       ts: Date.now()
     };
-    
+
     // Create a signed hash to prevent tampering
     const dataString = JSON.stringify(data);
     const signature = this.hash(dataString + this.masterKey);
-    
+
     return Buffer.from(JSON.stringify({
       d: data,
       s: signature.substring(0, 16) // Short signature for QR
@@ -198,15 +204,15 @@ class EncryptionService {
     try {
       const parsed = JSON.parse(Buffer.from(qrData, 'base64').toString());
       const { d, s } = parsed;
-      
+
       // Verify signature
       const dataString = JSON.stringify(d);
       const expectedSignature = this.hash(dataString + this.masterKey).substring(0, 16);
-      
+
       if (s !== expectedSignature) {
         return null;
       }
-      
+
       return d;
     } catch (error) {
       return null;
@@ -224,11 +230,11 @@ class EncryptionService {
     if (!data || data.length <= visibleStart + visibleEnd) {
       return data;
     }
-    
+
     const start = data.substring(0, visibleStart);
     const end = data.substring(data.length - visibleEnd);
     const masked = '*'.repeat(data.length - visibleStart - visibleEnd);
-    
+
     return `${start}${masked}${end}`;
   }
 
@@ -240,13 +246,13 @@ class EncryptionService {
    */
   encryptFields(obj, fields) {
     const encrypted = { ...obj };
-    
+
     for (const field of fields) {
       if (obj[field]) {
         encrypted[field] = this.encrypt(obj[field]);
       }
     }
-    
+
     return encrypted;
   }
 
@@ -258,13 +264,13 @@ class EncryptionService {
    */
   decryptFields(obj, fields) {
     const decrypted = { ...obj };
-    
+
     for (const field of fields) {
       if (obj[field] && typeof obj[field] === 'object' && obj[field].encrypted) {
         decrypted[field] = this.decrypt(obj[field]);
       }
     }
-    
+
     return decrypted;
   }
 }

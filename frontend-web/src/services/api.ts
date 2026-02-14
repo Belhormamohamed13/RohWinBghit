@@ -1,5 +1,20 @@
 import axios, { AxiosError, AxiosInstance, AxiosRequestConfig } from 'axios'
 import { useAuthStore } from '../store/authStore'
+import type {
+  LoginRequest,
+  RegisterRequest,
+  CreateTripRequest,
+  UpdateTripRequest,
+  TripSearchParams,
+  CreateBookingRequest,
+  ConfirmPaymentRequest,
+  CreateVehicleRequest,
+  UpdateVehicleRequest,
+  ProcessPaymentRequest,
+  CreatePaymentIntentRequest,
+  CreateReviewRequest,
+  UpdateProfileRequest,
+} from '../types'
 
 const API_BASE_URL = import.meta.env.VITE_API_URL || 'http://localhost:5001/api'
 
@@ -102,20 +117,13 @@ export const authApi = {
 }
 
 export const tripsApi = {
-  search: (params: {
-    fromWilayaId?: number
-    toWilayaId?: number
-    date?: string
-    seats?: number
-    page?: number
-    limit?: number
-  }) => api.get('/trips/search', { params }),
+  search: (params: TripSearchParams) => api.get('/trips/search', { params }),
 
   getById: (id: string) => api.get(`/trips/${id}`),
 
-  create: (data: any) => api.post('/trips', data),
+  create: (data: CreateTripRequest) => api.post('/trips', data),
 
-  update: (id: string, data: any) => api.put(`/trips/${id}`, data),
+  update: (id: string, data: UpdateTripRequest) => api.put(`/trips/${id}`, data),
 
   delete: (id: string) => api.delete(`/trips/${id}`),
 
@@ -127,7 +135,7 @@ export const tripsApi = {
 }
 
 export const bookingsApi = {
-  create: (data: any) => api.post('/bookings', data),
+  create: (data: CreateBookingRequest) => api.post('/bookings', data),
 
   getMyBookings: (params?: { status?: string; page?: number; limit?: number }) =>
     api.get('/bookings/my-bookings', { params }),
@@ -139,7 +147,7 @@ export const bookingsApi = {
   cancel: (id: string, reason: string) =>
     api.post(`/bookings/${id}/cancel`, { reason }),
 
-  confirmPayment: (id: string, paymentData: any) =>
+  confirmPayment: (id: string, paymentData: ConfirmPaymentRequest) =>
     api.post(`/bookings/${id}/confirm-payment`, paymentData),
 
   updateStatus: (id: string, status: string) =>
@@ -160,9 +168,9 @@ export const wilayasApi = {
 export const vehiclesApi = {
   getMyVehicles: () => api.get('/vehicles/my-vehicles'),
 
-  create: (data: any) => api.post('/vehicles', data),
+  create: (data: CreateVehicleRequest) => api.post('/vehicles', data),
 
-  update: (id: string, data: any) => api.put(`/vehicles/${id}`, data),
+  update: (id: string, data: UpdateVehicleRequest) => api.put(`/vehicles/${id}`, data),
 
   delete: (id: string) => api.delete(`/vehicles/${id}`),
   uploadImage: (formData: FormData) => api.post('/vehicles/upload-image', formData, {
@@ -173,16 +181,16 @@ export const vehiclesApi = {
 export const paymentsApi = {
   getMethods: () => api.get('/payments/methods'),
 
-  process: (data: any) => api.post('/payments/process', data),
+  process: (data: ProcessPaymentRequest) => api.post('/payments/process', data),
 
-  createIntent: (data: any) => api.post('/payments/intent', data),
+  createIntent: (data: CreatePaymentIntentRequest) => api.post('/payments/intent', data),
 
   refund: (bookingId: string, reason: string) =>
     api.post(`/payments/refund/${bookingId}`, { reason }),
 }
 
 export const reviewsApi = {
-  create: (data: any) => api.post('/reviews', data),
+  create: (data: CreateReviewRequest) => api.post('/reviews', data),
 
   getByUser: (userId: string, params?: { page?: number; limit?: number }) =>
     api.get(`/reviews/user/${userId}`, { params }),
@@ -208,7 +216,7 @@ export const chatApi = {
 }
 
 export const userApi = {
-  updateProfile: (data: any) => api.put('/users/profile', data),
+  updateProfile: (data: UpdateProfileRequest) => api.put('/users/profile', data),
 
   uploadAvatar: (file: File) => {
     const formData = new FormData()
