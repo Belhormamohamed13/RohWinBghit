@@ -319,14 +319,12 @@ This project is licensed under the MIT License - see the [LICENSE](LICENSE) file
 </p>
 
 
+```# RohWinBghit
+
 ```
 rohwinbghit
-├─ .DS_Store
 ├─ README.md
 ├─ backend
-│  ├─ .DS_Store
-│  ├─ .env
-│  ├─ .env.example
 │  ├─ backend
 │  ├─ checkTrips.js
 │  ├─ knexfile.js
@@ -335,17 +333,22 @@ rohwinbghit
 │  │  ├─ 20260211155410_add_image_and_condition_to_vehicles.js
 │  │  ├─ 20260211165853_update_trips_and_vehicles_schema.js
 │  │  ├─ 20260211193200_fix_missing_trip_columns.js
-│  │  └─ 20260211235032_add_verification_fields_to_users.js
+│  │  ├─ 20260211235032_add_verification_fields_to_users.js
+│  │  ├─ 20260212143108_add_reviews_table.js
+│  │  ├─ 20260212151851_create_chat_tables.js
+│  │  ├─ 20260213174613_update_trip_and_user_statuses.js
+│  │  ├─ 20260213180115_drop_trip_status_constraint.js
+│  │  └─ 20260213180634_drop_booking_status_constraint.js
 │  ├─ package-lock.json
 │  ├─ package.json
 │  ├─ seeds
 │  │  └─ 01_wilayas.js
 │  ├─ src
-│  │  ├─ .DS_Store
 │  │  ├─ config
 │  │  │  └─ database.js
 │  │  ├─ models
 │  │  │  ├─ Booking.model.js
+│  │  │  ├─ Chat.model.js
 │  │  │  ├─ Review.model.js
 │  │  │  ├─ Route.model.js
 │  │  │  ├─ Trip.model.js
@@ -375,7 +378,8 @@ rohwinbghit
 │  │  └─ utils
 │  │     ├─ date.util.js
 │  │     ├─ jwt.util.js
-│  │     └─ response.util.js
+│  │     ├─ response.util.js
+│  │     └─ token-blacklist.js
 │  ├─ update_admin.js
 │  └─ uploads
 │     └─ vehicles
@@ -386,10 +390,12 @@ rohwinbghit
 │  │  ├─ README.md
 │  │  └─ devices.json
 │  ├─ App.tsx
+│  ├─ babel.config.js
 │  ├─ package-lock.json
 │  ├─ package.json
 │  ├─ src
 │  │  ├─ constants
+│  │  │  ├─ config.ts
 │  │  │  └─ theme.ts
 │  │  ├─ navigation
 │  │  │  └─ AppNavigator.tsx
@@ -399,93 +405,27 @@ rohwinbghit
 │  │  │  ├─ auth
 │  │  │  │  ├─ LoginScreen.tsx
 │  │  │  │  └─ RegisterScreen.tsx
+│  │  │  ├─ driver
+│  │  │  │  └─ PublishTripScreen.tsx
 │  │  │  ├─ main
 │  │  │  │  ├─ HomeScreen.tsx
 │  │  │  │  ├─ MessagesScreen.tsx
+│  │  │  │  ├─ ProfileScreen.tsx
+│  │  │  │  ├─ SearchResultsScreen.tsx
 │  │  │  │  ├─ SearchScreen.tsx
+│  │  │  │  ├─ TripDetailsScreen.tsx
 │  │  │  │  └─ TripsScreen.tsx
 │  │  │  └─ passenger
+│  │  │     ├─ BookingScreen.tsx
 │  │  │     └─ TicketScreen.tsx
-│  │  └─ store
-│  │     └─ authStore.ts
+│  │  ├─ services
+│  │  │  └─ api.ts
+│  │  ├─ store
+│  │  │  └─ authStore.ts
+│  │  └─ types
+│  │     └─ index.ts
 │  └─ tsconfig.json
 └─ frontend-web
-   ├─ dist
-   │  ├─ assets
-   │  │  ├─ Checkout-DdfZd-PK.js
-   │  │  ├─ Checkout-DdfZd-PK.js.map
-   │  │  ├─ Confirmation-B2CsNFnA.js
-   │  │  ├─ Confirmation-B2CsNFnA.js.map
-   │  │  ├─ Dashboard-CKyjzW_r.js
-   │  │  ├─ Dashboard-CKyjzW_r.js.map
-   │  │  ├─ Details-DTf9TEer.js
-   │  │  ├─ Details-DTf9TEer.js.map
-   │  │  ├─ ForgotPassword-DN9tI7XM.js
-   │  │  ├─ ForgotPassword-DN9tI7XM.js.map
-   │  │  ├─ Home-Bxwj3z5S.js
-   │  │  ├─ Home-Bxwj3z5S.js.map
-   │  │  ├─ Inbox-BYxj6OYy.js
-   │  │  ├─ Inbox-BYxj6OYy.js.map
-   │  │  ├─ Login-84q3FhpO.js
-   │  │  ├─ Login-84q3FhpO.js.map
-   │  │  ├─ MyBookings-CVvZ2rbZ.js
-   │  │  ├─ MyBookings-CVvZ2rbZ.js.map
-   │  │  ├─ MyTrips-D2Z3TtaQ.js
-   │  │  ├─ MyTrips-D2Z3TtaQ.js.map
-   │  │  ├─ MyVehicles-DJ1Q0w-Y.js
-   │  │  ├─ MyVehicles-DJ1Q0w-Y.js.map
-   │  │  ├─ NotFound-HXEi4CUB.js
-   │  │  ├─ NotFound-HXEi4CUB.js.map
-   │  │  ├─ Profile-D-IFzcSm.js
-   │  │  ├─ Profile-D-IFzcSm.js.map
-   │  │  ├─ PublishTrip-C4LXfPXa.js
-   │  │  ├─ PublishTrip-C4LXfPXa.js.map
-   │  │  ├─ Register-CsyiBRSq.js
-   │  │  ├─ Register-CsyiBRSq.js.map
-   │  │  ├─ ResetPassword-B5748TZF.js
-   │  │  ├─ ResetPassword-B5748TZF.js.map
-   │  │  ├─ Results-p60dwXWF.js
-   │  │  ├─ Results-p60dwXWF.js.map
-   │  │  ├─ Search-n65wFUsI.js
-   │  │  ├─ Search-n65wFUsI.js.map
-   │  │  ├─ UsersManagement-BKzRexei.js
-   │  │  ├─ UsersManagement-BKzRexei.js.map
-   │  │  ├─ alert-circle-BRB791Ae.js
-   │  │  ├─ alert-circle-BRB791Ae.js.map
-   │  │  ├─ api-e8fner6b.js
-   │  │  ├─ api-e8fner6b.js.map
-   │  │  ├─ arrow-left-an2L5SVN.js
-   │  │  ├─ arrow-left-an2L5SVN.js.map
-   │  │  ├─ arrow-right-DOORWBuz.js
-   │  │  ├─ arrow-right-DOORWBuz.js.map
-   │  │  ├─ calendar-CAy_8Z9E.js
-   │  │  ├─ calendar-CAy_8Z9E.js.map
-   │  │  ├─ check-circle-C4ul45EE.js
-   │  │  ├─ check-circle-C4ul45EE.js.map
-   │  │  ├─ clock-BlqPMwHy.js
-   │  │  ├─ clock-BlqPMwHy.js.map
-   │  │  ├─ fr-qQOHpMn9.js
-   │  │  ├─ fr-qQOHpMn9.js.map
-   │  │  ├─ index-7qAxXIiF.js
-   │  │  ├─ index-7qAxXIiF.js.map
-   │  │  ├─ index-D1G0zhnf.css
-   │  │  ├─ info-C-S1y8Gf.js
-   │  │  ├─ info-C-S1y8Gf.js.map
-   │  │  ├─ lock-Cvh-Aeah.js
-   │  │  ├─ lock-Cvh-Aeah.js.map
-   │  │  ├─ motion-Bb8VJbUu.js
-   │  │  ├─ motion-Bb8VJbUu.js.map
-   │  │  ├─ shield-BrMg9Chg.js
-   │  │  ├─ shield-BrMg9Chg.js.map
-   │  │  ├─ types-9BXKseSZ.js
-   │  │  ├─ types-9BXKseSZ.js.map
-   │  │  ├─ useMutation-CIlZLu9s.js
-   │  │  ├─ useMutation-CIlZLu9s.js.map
-   │  │  ├─ useQuery-C88oDNNs.js
-   │  │  ├─ useQuery-C88oDNNs.js.map
-   │  │  ├─ users-tbM1H_jt.js
-   │  │  └─ users-tbM1H_jt.js.map
-   │  └─ index.html
    ├─ index.html
    ├─ package-lock.json
    ├─ package.json
@@ -493,20 +433,36 @@ rohwinbghit
    ├─ src
    │  ├─ App.tsx
    │  ├─ components
+   │  │  ├─ admin
+   │  │  │  └─ AdminComponents.tsx
+   │  │  ├─ chat
+   │  │  │  └─ ChatInterface.tsx
    │  │  ├─ common
+   │  │  │  ├─ Avatar.tsx
+   │  │  │  ├─ Badge.tsx
+   │  │  │  ├─ Button.tsx
+   │  │  │  ├─ Card.tsx
+   │  │  │  ├─ FiltersSidebar.tsx
+   │  │  │  ├─ Input.tsx
    │  │  │  ├─ LoadingSpinner.tsx
-   │  │  │  └─ ProtectedRoute.tsx
+   │  │  │  ├─ ProtectedRoute.tsx
+   │  │  │  ├─ SearchForm.tsx
+   │  │  │  └─ TrustBadges.tsx
    │  │  ├─ layout
    │  │  │  ├─ AdminLayout.tsx
    │  │  │  ├─ DriverLayout.tsx
    │  │  │  ├─ Footer.tsx
+   │  │  │  ├─ Hero.tsx
    │  │  │  ├─ Layout.tsx
+   │  │  │  ├─ MobileNav.tsx
    │  │  │  ├─ Navbar.tsx
    │  │  │  ├─ PassengerLayout.tsx
    │  │  │  └─ PassengerSpaceLayout.tsx
    │  │  └─ trips
+   │  │     ├─ TripCard.tsx
    │  │     └─ TripMap.tsx
    │  ├─ constants
+   │  │  ├─ designTokens.ts
    │  │  └─ wilayaCoords.ts
    │  ├─ index.css
    │  ├─ main.tsx
@@ -527,6 +483,7 @@ rohwinbghit
    │  │  │  ├─ Checkout.tsx
    │  │  │  └─ Confirmation.tsx
    │  │  ├─ chat
+   │  │  │  ├─ Chat.tsx
    │  │  │  └─ Inbox.tsx
    │  │  ├─ driver
    │  │  │  ├─ DriverDashboard.tsx
@@ -540,6 +497,7 @@ rohwinbghit
    │  │  │  └─ Wallet.tsx
    │  │  ├─ passenger
    │  │  │  ├─ Favorites.tsx
+   │  │  │  ├─ History.tsx
    │  │  │  ├─ Inbox.tsx
    │  │  │  ├─ MyBookings.tsx
    │  │  │  ├─ PassengerDashboard.tsx
@@ -559,6 +517,7 @@ rohwinbghit
    │  ├─ types
    │  │  └─ index.ts
    │  ├─ utils
+   │  │  ├─ cn.ts
    │  │  └─ dateUtil.ts
    │  └─ vite-env.d.ts
    ├─ tailwind.config.js
@@ -566,4 +525,4 @@ rohwinbghit
    ├─ tsconfig.node.json
    └─ vite.config.ts
 
-```# RohWinBghit
+```

@@ -13,6 +13,7 @@ const ChatView = lazy(() => import('../chat/Chat'));
 const TripResults = lazy(() => import('../trips/Results'));
 const TripDetails = lazy(() => import('../trips/Details'));
 const BookingConfirmation = lazy(() => import('../booking/Confirmation'));
+const HistoryView = lazy(() => import('./History'));
 
 const PassengerSpace: React.FC = () => {
     const location = useLocation();
@@ -64,7 +65,8 @@ const PassengerSpace: React.FC = () => {
                     <Route path="spending" element={<SpendingView />} />
                     <Route path="messages" element={<ChatView noLayout={true} />} /> {/* Added messages route */}
                     <Route path="messages/:userId" element={<ChatView noLayout={true} />} />
-                    <Route path="favorites" element={<FavoritesView />} /> {/* Added favorites route */}
+                    <Route path="favorites" element={<FavoritesView />} />
+                    <Route path="history" element={<HistoryView />} />
 
                     {/* Catch unknown sub-paths and redirect to search within passenger space */}
                     <Route path="*" element={<Navigate to="/passenger/search" replace />} />
