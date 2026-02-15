@@ -1,379 +1,358 @@
 import { useState } from 'react';
-import { useNavigate, Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { useQuery } from '@tanstack/react-query';
 import { wilayasApi } from '../services/api';
-import { motion } from 'framer-motion';
-import {
-  Search,
-  MapPin,
-  Calendar,
-  Users,
-  ArrowRight,
-  Wallet,
-  ShieldCheck,
-  Users2,
-  PlusCircle,
-  Navigation
-} from 'lucide-react';
+// @ts-ignore
+import DatePicker, { registerLocale } from 'react-datepicker';
+import { fr } from 'date-fns/locale/fr';
+import { format } from 'date-fns';
+
+registerLocale('fr', fr);
 
 const Home = () => {
   const navigate = useNavigate();
-  const [searchFilters, setSearchFilters] = useState({
-    from: '',
-    to: '',
-    date: '',
-    seats: 1
-  });
+  const [from, setFrom] = useState('');
+  const [to, setTo] = useState('');
+  const [startDate, setStartDate] = useState<Date | null>(null);
+  const [seats, setSeats] = useState(1);
 
+  // Fetch Wilayas
   const { data: wilayas } = useQuery({
     queryKey: ['wilayas'],
     queryFn: async () => {
       const response = await wilayasApi.getAll();
-      return response.data.data;
+      return response.data.data || response.data;
     }
   });
 
-  const handleSearch = (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSearch = () => {
     const params = new URLSearchParams();
-    if (searchFilters.from) params.append('from', searchFilters.from);
-    if (searchFilters.to) params.append('to', searchFilters.to);
-    if (searchFilters.date) params.append('date', searchFilters.date);
-    params.append('seats', searchFilters.seats.toString());
-    navigate(`/trips/results?${params.toString()}`);
+    if (from) params.append('from', from);
+    if (to) params.append('to', to);
+    if (startDate) params.append('date', format(startDate, 'yyyy-MM-dd'));
+    params.append('seats', seats.toString());
+    navigate(`/trips/search?${params.toString()}`);
   };
 
-  const benefits = [
-    {
-      title: 'Économique',
-      desc: 'Économisez sur chaque trajet en partageant les frais de carburant. Parfait pour les étudiants et les navetteurs réguliers.',
-      icon: Wallet,
-      color: 'text-green-500',
-      bg: 'bg-green-500/10'
-    },
-    {
-      title: 'Sûr & Sécurisé',
-      desc: 'Profils vérifiés, documents obligatoires et système de notation robuste pour votre tranquillité d\'esprit.',
-      icon: ShieldCheck,
-      color: 'text-primary',
-      bg: 'bg-primary/10'
-    },
-    {
-      title: 'Communauté Locale',
-      desc: 'Connectez-vous avec des milliers d\'Algériens. Faites de nouvelles rencontres et transformez vos trajets en moments agréables.',
-      icon: Users2,
-      color: 'text-orange-500',
-      bg: 'bg-orange-500/10'
-    }
-  ];
-
-  const popularRoutes = [
-    { from: 'Alger', to: 'Blida', price: '500', trips: '45', image: 'https://images.unsplash.com/photo-1578912995058-29307779f42b?auto=format&fit=crop&q=80&w=400' },
-    { from: 'Alger', to: 'Oran', price: '1,200', trips: '12', image: 'https://images.unsplash.com/photo-1594226801341-43387fae51ca?auto=format&fit=crop&q=80&w=400' },
-    { from: 'Constantine', to: 'Annaba', price: '900', trips: '8', image: 'https://images.unsplash.com/photo-1552332386-f8dd00dc2f85?auto=format&fit=crop&q=80&w=400' },
-    { from: 'Alger', to: 'Ghardaïa', price: '2,500', trips: '4', image: 'https://images.unsplash.com/photo-1582234372722-50d7ccc30eba?auto=format&fit=crop&q=80&w=400' }
-  ];
-
   return (
-    <div className="min-h-screen bg-slate-50 dark:bg-[#08110b] selection:bg-primary/30">
-      {/* Hero Section */}
-      <section className="relative pt-20 pb-20 overflow-hidden bg-white dark:bg-[#08110b]">
-        <div className="max-w-7xl mx-auto px-6 relative z-10">
-          <div className="grid lg:grid-cols-2 gap-16 items-center">
-            <motion.div
-              initial={{ opacity: 0, x: -30 }}
-              animate={{ opacity: 1, x: 0 }}
-              className="space-y-10"
-            >
-              <div className="space-y-6">
-                <h1 className="text-5xl md:text-7xl font-black text-slate-900 dark:text-white leading-[1.1] tracking-tight">
-                  Voyagez à travers <br />
-                  <span className="text-primary italic">l'Algérie</span>, <br />
-                  en toute sécurité.
-                </h1>
-                <p className="text-xl text-slate-500 dark:text-slate-400 max-w-xl font-medium leading-relaxed">
-                  Connectez-vous avec des conducteurs fiables ou partagez votre trajet pour réduire vos frais. Rejoignez la plus grande communauté de covoiturage au pays.
-                </p>
-              </div>
+    <div className="font-sans antialiased text-slate-800 dark:text-slate-100 bg-background-light dark:bg-background-dark transition-colors duration-300">
+      {/* HERO SECTION */}
+      <section className="relative h-[80vh] flex flex-col items-center justify-center px-6 overflow-hidden">
+        {/* ... (Hero Image & Content - Unchanged) ... */}
+        <img
+          alt="Algerian Desert Landscape"
+          className="absolute inset-0 w-full h-full object-cover"
+          src="https://lh3.googleusercontent.com/aida-public/AB6AXuBYGckyaVLE6nw2nGTIpoTG4OzP1h_6QVFsuzusghIchfrYuwAGGeMg_l_KqZZNnxlCiNeqOm3HDuAMJ9NSFMYYQSiyby3Kyp_lEJd3Av4JVhj0gUCR2MhvnyhOyRYMg3HKvMCibsdGjt_ltFDjeSWUddhLW1zEkU01PGobBxikA37YiYq-28XdfALeTu6jh13e9aIzOyUKBRijL2yDfl6kACAikp-CulLlJqpgmDp8WWEt09tcRwb9NIygsIOjeO4RgaTX8IuLuF9_"
+        />
+        <div className="absolute inset-0 hero-gradient"></div>
 
-              <div className="flex items-center gap-6">
-                <div className="flex -space-x-3">
-                  {[1, 2, 3, 4].map(i => (
-                    <img
-                      key={i}
-                      src={`https://i.pravatar.cc/100?img=${i + 10}`}
-                      className="w-12 h-12 rounded-full border-4 border-white dark:border-slate-900 shadow-sm"
-                      alt="User"
-                    />
-                  ))}
-                  <div className="w-12 h-12 rounded-full border-4 border-white dark:border-slate-900 bg-primary flex items-center justify-center text-[10px] font-black text-slate-900 shadow-sm">
-                    50K+
-                  </div>
-                </div>
-                <p className="text-sm font-bold text-slate-500 uppercase tracking-widest italic">Approuvé par +50,000 voyageurs</p>
-              </div>
-            </motion.div>
-
-            <motion.div
-              initial={{ opacity: 0, scale: 0.9, rotate: 2 }}
-              animate={{ opacity: 1, scale: 1, rotate: 2 }}
-              className="relative hidden lg:block"
-            >
-              <div className="rounded-[3rem] overflow-hidden shadow-2xl bg-white p-3 border border-slate-100 dark:border-slate-800">
-                <img
-                  src="https://images.unsplash.com/photo-1541675154750-0444c7d51e8e?auto=format&fit=crop&q=80&w=1200"
-                  className="rounded-[2.5rem] w-full aspect-[4/3] object-cover"
-                  alt="Scenario Algerie"
-                />
-              </div>
-              <div className="absolute -bottom-8 -left-8 bg-primary text-slate-900 p-6 rounded-[2rem] shadow-2xl -rotate-6 border-4 border-white dark:border-slate-900">
-                <p className="text-sm font-black uppercase tracking-tight">Voyagez Malin</p>
-                <p className="text-xs font-bold opacity-80 mt-1 italic leading-none">Alger → Oran dès 800 DZD</p>
-              </div>
-            </motion.div>
-          </div>
+        <div className="relative z-10 text-center max-w-4xl mb-12 animate-fade-up">
+          <h2 className="text-6xl md:text-8xl font-display text-white mb-4 tracking-tight drop-shadow-lg">
+            VOTRE DESTINATION, <span className="text-primary">NOTRE PASSION.</span>
+          </h2>
+          <p className="text-xl text-slate-200 font-light max-w-2xl mx-auto drop-shadow-md">
+            Explorez l'Algérie avec élégance. Le premier réseau de transport haut de gamme inter-wilayas.
+          </p>
         </div>
-      </section>
 
-      {/* Floating Search Bar */}
-      <div className="max-w-7xl mx-auto px-6 -mt-10 relative z-20">
-        <motion.div
-          initial={{ opacity: 0, y: 20 }}
-          animate={{ opacity: 1, y: 0 }}
-          transition={{ delay: 0.2 }}
-          className="bg-white dark:bg-slate-900 rounded-[2.5rem] shadow-elevated p-3 border border-slate-200 dark:border-slate-800"
-        >
-          <form onSubmit={handleSearch} className="flex flex-col lg:flex-row items-stretch lg:divide-x divide-slate-100 dark:divide-slate-800">
-            {/* Departure */}
-            <div className="flex-1 flex items-center px-6 py-4 gap-4">
-              <MapPin className="text-primary w-6 h-6 shrink-0" />
-              <div className="flex flex-col w-full">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">DÉPART</label>
-                <select
-                  value={searchFilters.from}
-                  onChange={(e) => setSearchFilters({ ...searchFilters, from: e.target.value })}
-                  className="w-full bg-transparent border-none p-0 focus:ring-0 text-slate-900 dark:text-white font-bold text-base placeholder:text-slate-300 appearance-none"
-                >
-                  <option value="">D'où partez-vous ?</option>
-                  {wilayas?.map((w: any) => <option key={w.code} value={w.code}>{w.code} - {w.name}</option>)}
-                </select>
-              </div>
-            </div>
-
-            {/* Arrival */}
-            <div className="flex-1 flex items-center px-6 py-4 gap-4">
-              <Navigation className="text-slate-400 w-6 h-6 shrink-0" />
-              <div className="flex flex-col w-full">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">DESTINATION</label>
-                <select
-                  value={searchFilters.to}
-                  onChange={(e) => setSearchFilters({ ...searchFilters, to: e.target.value })}
-                  className="w-full bg-transparent border-none p-0 focus:ring-0 text-slate-900 dark:text-white font-bold text-base placeholder:text-slate-300 appearance-none"
-                >
-                  <option value="">Où allez-vous ?</option>
-                  {wilayas?.map((w: any) => <option key={w.code} value={w.code}>{w.code} - {w.name}</option>)}
-                </select>
-              </div>
-            </div>
-
-            {/* Date */}
-            <div className="flex-1 flex items-center px-6 py-4 gap-4">
-              <Calendar className="text-slate-400 w-6 h-6 shrink-0" />
-              <div className="flex flex-col w-full">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">DATE</label>
-                <input
-                  type="date"
-                  value={searchFilters.date}
-                  onChange={(e) => setSearchFilters({ ...searchFilters, date: e.target.value })}
-                  className="w-full bg-transparent border-none p-0 focus:ring-0 text-slate-900 dark:text-white font-bold text-base transition-all dark:[color-scheme:dark]"
-                />
-              </div>
-            </div>
-
-            {/* Passengers */}
-            <div className="w-full lg:w-48 flex items-center px-6 py-4 gap-4">
-              <Users className="text-slate-400 w-6 h-6 shrink-0" />
-              <div className="flex flex-col w-full">
-                <label className="text-[10px] font-black uppercase tracking-widest text-slate-400 mb-1">PASSAGERS</label>
-                <input
-                  type="number"
-                  min="1"
-                  max="8"
-                  value={searchFilters.seats}
-                  onChange={(e) => setSearchFilters({ ...searchFilters, seats: parseInt(e.target.value) })}
-                  className="w-full bg-transparent border-none p-0 focus:ring-0 text-slate-900 dark:text-white font-bold text-base"
-                />
-              </div>
-            </div>
-
-            {/* CTA */}
-            <div className="p-2">
-              <button
-                type="submit"
-                className="w-full lg:w-auto bg-primary hover:bg-primary/90 text-slate-900 font-black py-5 px-10 rounded-[2rem] flex items-center justify-center gap-3 transition-all shadow-lg shadow-primary/20 hover:scale-[1.02] active:scale-95 text-xs uppercase tracking-widest"
-              >
-                <Search className="w-5 h-5" />
-                Rechercher
-              </button>
-            </div>
-          </form>
-        </motion.div>
-      </div>
-
-      {/* Benefits Section */}
-      <section className="py-32">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="text-center mb-20 space-y-4">
-            <h2 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight italic">
-              Pourquoi choisir <span className="text-primary italic">RohWinBghit</span> ?
-            </h2>
-            <p className="text-slate-500 dark:text-slate-400 max-w-2xl mx-auto font-medium">
-              La façon la plus simple de voyager entre les villes algériennes sans se ruiner.
-            </p>
-          </div>
-
-          <div className="grid md:grid-cols-3 gap-10">
-            {benefits.map((benefit, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, y: 20 }}
-                whileInView={{ opacity: 1, y: 0 }}
-                transition={{ delay: idx * 0.1 }}
-                viewport={{ once: true }}
-                className="bg-white dark:bg-slate-900/50 p-10 rounded-[3rem] border border-slate-100 dark:border-slate-800 shadow-soft hover:shadow-elevated transition-all group"
-              >
-                <div className={`w-16 h-16 ${benefit.bg} ${benefit.color} rounded-2xl flex items-center justify-center mb-8 group-hover:scale-110 transition-transform`}>
-                  <benefit.icon className="w-8 h-8" />
-                </div>
-                <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-4 tracking-tight uppercase leading-none italic">{benefit.title}</h3>
-                <p className="text-slate-500 dark:text-slate-400 leading-relaxed font-medium">
-                  {benefit.desc}
-                </p>
-              </motion.div>
-            ))}
-          </div>
-        </div>
-      </section>
-
-      {/* Popular Routes */}
-      <section className="bg-white dark:bg-slate-900/30 py-32 rounded-[5rem]">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="flex flex-col md:flex-row justify-between items-end mb-16 gap-6">
-            <div className="space-y-4 text-left">
-              <h2 className="text-4xl font-black text-slate-900 dark:text-white tracking-tight italic">Trajets Populaires</h2>
-              <p className="text-slate-500 dark:text-slate-400 font-medium">Découvrez où les autres voyageurs se rendent aujourd'hui.</p>
-            </div>
-            <button className="text-primary font-black text-xs uppercase tracking-widest flex items-center gap-3 hover:gap-5 transition-all group">
-              Voir tous les trajets
-              <ArrowRight className="w-4 h-4" />
+        <div className="relative z-20 w-full max-w-[95vw] lg:max-w-7xl animate-fade-up flex flex-col gap-4 mt-24" style={{ animationDelay: '0.2s' }}>
+          {/* SEARCH TABS */}
+          <div className="flex items-center gap-6 px-4">
+            <button className="bg-white text-slate-900 font-bold text-base px-6 py-2 rounded-t-xl flex items-center gap-2 shadow-lg">
+              <span className="material-icons-round text-primary">directions_car</span>
+              Covoiturage
+            </button>
+            <button className="bg-white/10 hover:bg-white text-slate-200 hover:text-slate-900 font-medium text-base px-6 py-2 rounded-t-xl flex items-center gap-2 transition-all">
+              <span className="material-icons-round">directions_bus</span>
+              Bus
+            </button>
+            <button className="bg-white/10 hover:bg-white text-slate-200 hover:text-slate-900 font-medium text-base px-6 py-2 rounded-t-xl flex items-center gap-2 transition-all">
+              <span className="material-icons-round">train</span>
+              Train
             </button>
           </div>
 
-          <div className="grid sm:grid-cols-2 lg:grid-cols-4 gap-8">
-            {popularRoutes.map((route, idx) => (
-              <motion.div
-                key={idx}
-                initial={{ opacity: 0, scale: 0.95 }}
-                whileInView={{ opacity: 1, scale: 1 }}
-                transition={{ delay: idx * 0.1 }}
-                viewport={{ once: true }}
-                className="group bg-white dark:bg-slate-900 rounded-[2.5rem] overflow-hidden shadow-soft border border-slate-100 dark:border-slate-800 cursor-pointer"
+          {/* MAIN SEARCH BAR - LONG STRIP */}
+          <div className="bg-white rounded-[20px] shadow-2xl p-2 flex flex-col lg:flex-row items-center divide-y lg:divide-y-0 lg:divide-x divide-slate-100 min-h-[80px]">
+
+            {/* DEPARTURE */}
+            <div className="flex-1 w-full lg:w-auto flex items-center px-4 py-3 hover:bg-slate-50 transition-colors rounded-xl group relative">
+              <span className="material-icons-round text-slate-400 group-hover:text-primary transition-colors text-2xl mr-3">radio_button_unchecked</span>
+              <div className="flex flex-col w-full">
+                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Départ</label>
+                <select
+                  className="w-full bg-transparent border-none p-0 text-slate-900 font-bold text-lg cursor-pointer focus:ring-0 outline-none leading-tight truncate appearance-none"
+                  value={from}
+                  onChange={(e) => setFrom(e.target.value)}
+                >
+                  <option value="" className="text-slate-300">D'où partez-vous ?</option>
+                  {wilayas?.map((w: any) => (
+                    <option key={w.code} value={w.code}>{w.code} - {w.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* DESTINATION */}
+            <div className="flex-1 w-full lg:w-auto flex items-center px-4 py-3 hover:bg-slate-50 transition-colors rounded-xl group relative">
+              <span className="material-icons-round text-slate-400 group-hover:text-primary transition-colors text-2xl mr-3">radio_button_unchecked</span>
+              <div className="flex flex-col w-full">
+                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Destination</label>
+                <select
+                  className="w-full bg-transparent border-none p-0 text-slate-900 font-bold text-lg cursor-pointer focus:ring-0 outline-none leading-tight truncate appearance-none"
+                  value={to}
+                  onChange={(e) => setTo(e.target.value)}
+                >
+                  <option value="" className="text-slate-300">Où allez-vous ?</option>
+                  {wilayas?.map((w: any) => (
+                    <option key={w.code} value={w.code}>{w.code} - {w.name}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* DATE */}
+            <div className="w-full lg:w-[220px] flex items-center px-4 py-3 hover:bg-slate-50 transition-colors rounded-xl group relative">
+              <span className="material-icons-round text-slate-400 group-hover:text-primary transition-colors text-2xl mr-3">calendar_today</span>
+              <div className="flex flex-col w-full">
+                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Date</label>
+                <DatePicker
+                  selected={startDate}
+                  onChange={(date: Date | null) => setStartDate(date)}
+                  placeholderText="Aujourd'hui"
+                  locale="fr"
+                  dateFormat="dd MMM yyyy"
+                  minDate={new Date()}
+                  className="bg-transparent border-none focus:ring-0 w-full p-0 text-slate-900 font-bold text-lg placeholder-slate-900 cursor-pointer outline-none active:outline-none"
+                  calendarClassName="font-sans border-0 rounded-2xl shadow-2xl overflow-hidden bg-white text-slate-800"
+                  popperPlacement="bottom-start"
+                />
+              </div>
+            </div>
+
+            {/* PASSENGERS */}
+            <div className="w-full lg:w-[180px] flex items-center px-4 py-3 hover:bg-slate-50 transition-colors rounded-xl group relative">
+              <span className="material-icons-round text-slate-400 group-hover:text-primary transition-colors text-2xl mr-3">person_outline</span>
+              <div className="flex flex-col w-full">
+                <label className="text-[11px] font-bold text-slate-400 uppercase tracking-wider mb-0.5">Passagers</label>
+                <select
+                  className="w-full bg-transparent border-none p-0 text-slate-900 font-bold text-lg cursor-pointer focus:ring-0 outline-none leading-tight appearance-none"
+                  value={seats}
+                  onChange={(e) => setSeats(Number(e.target.value))}
+                >
+                  {[1, 2, 3, 4, 5, 6, 7, 8].map(num => (
+                    <option key={num} value={num}>{num} Passager{num > 1 ? 's' : ''}</option>
+                  ))}
+                </select>
+              </div>
+            </div>
+
+            {/* BUTTON */}
+            <div className="p-2 w-full lg:w-auto">
+              <button
+                onClick={handleSearch}
+                className="w-full lg:w-auto h-full bg-[#00AFF5] hover:bg-[#0099d6] text-white font-bold text-lg px-8 py-4 rounded-xl transition-all shadow-lg hover:shadow-xl active:scale-95 flex items-center justify-center min-w-[140px]"
               >
-                <div className="h-48 overflow-hidden relative">
-                  <img
-                    src={route.image}
-                    className="w-full h-full object-cover transition-transform duration-700 group-hover:scale-110"
-                    alt={route.to}
-                  />
-                  <div className="absolute top-4 left-4 bg-white/95 backdrop-blur px-4 py-2 rounded-xl text-[10px] font-black text-slate-900 uppercase tracking-widest shadow-lg">
-                    Dès {route.price} DZD
+                Rechercher
+              </button>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* FEATURES GRID */}
+      <section className="max-w-7xl mx-auto px-6 relative z-30 pb-20 pt-10">
+        <div className="grid grid-cols-1 md:grid-cols-3 gap-6">
+          <div className="bg-white/5 backdrop-blur-md p-8 rounded-3xl shadow-lg hover:-translate-y-2 transition-all duration-300 border border-white/10 hover:border-primary/30 group">
+            <div className="h-16 w-16 bg-white/10 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-background-dark transition-colors">
+              <span className="material-icons-round text-slate-900 dark:text-white text-3xl group-hover:text-inherit">directions_car</span>
+            </div>
+            <h3 className="text-2xl font-bold mb-3 text-slate-900 dark:text-white">Covoiturage</h3>
+            <p className="text-slate-600 dark:text-slate-400 leading-relaxed mb-6">Partagez vos trajets avec des voyageurs raffinés partout en Algérie.</p>
+            <div onClick={() => navigate('/trips/search')} className="flex items-center text-primary font-bold cursor-pointer hover:underline decoration-primary underline-offset-4">
+              En savoir plus <span className="material-icons-round ml-2 group-hover:translate-x-1 transition-transform">arrow_forward</span>
+            </div>
+          </div>
+          <div className="bg-white/5 backdrop-blur-md p-8 rounded-3xl shadow-lg hover:-translate-y-2 transition-all duration-300 border border-white/10 hover:border-[#00AFF5]/30 group">
+            <div className="h-16 w-16 bg-white/10 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-[#00AFF5] group-hover:text-white transition-colors">
+              <span className="material-icons-round text-slate-900 dark:text-white text-3xl group-hover:text-inherit">directions_bus</span>
+            </div>
+            <h3 className="text-2xl font-bold mb-3 text-slate-900 dark:text-white">Bus Premium</h3>
+            <p className="text-slate-600 dark:text-slate-400 leading-relaxed mb-6">Plus de 48 wilayas desservies dans un confort absolu dès 1200 DA.</p>
+            <div className="flex items-center text-[#00AFF5] font-bold cursor-pointer hover:underline decoration-[#00AFF5] underline-offset-4">
+              Réserver <span className="material-icons-round ml-2 group-hover:translate-x-1 transition-transform">arrow_forward</span>
+            </div>
+          </div>
+          <div className="bg-white/5 backdrop-blur-md p-8 rounded-3xl shadow-lg hover:-translate-y-2 transition-all duration-300 border border-white/10 hover:border-primary/30 group">
+            <div className="h-16 w-16 bg-white/10 rounded-2xl flex items-center justify-center mb-6 group-hover:bg-primary group-hover:text-background-dark transition-colors">
+              <span className="material-icons-round text-slate-900 dark:text-white text-3xl group-hover:text-inherit">train</span>
+            </div>
+            <h3 className="text-2xl font-bold mb-3 text-slate-900 dark:text-white">Train SNTF</h3>
+            <p className="text-slate-600 dark:text-slate-400 leading-relaxed mb-6">Billets sans frais supplémentaires. Le voyage iconique par excellence.</p>
+            <div className="flex items-center text-primary font-bold cursor-pointer hover:underline decoration-primary underline-offset-4">
+              Horaires <span className="material-icons-round ml-2 group-hover:translate-x-1 transition-transform">arrow_forward</span>
+            </div>
+          </div>
+        </div>
+      </section>
+
+      {/* POPULAR DESTINATIONS */}
+      <section className="py-20 bg-slate-50 dark:bg-transparent berber-pattern">
+        <div className="max-w-7xl mx-auto px-6">
+          <div className="flex justify-between items-end mb-12">
+            <div>
+              <h2 className="text-4xl md:text-5xl font-display tracking-wide mb-2 text-slate-900 dark:text-white">LE MEILLEUR D'ALGÉRIE</h2>
+              <p className="text-slate-500 dark:text-slate-400 font-light">Explorez nos joyaux nationaux à des tarifs exceptionnels.</p>
+            </div>
+            <button className="hidden md:flex items-center gap-2 font-bold text-primary hover:underline underline-offset-4 transition-all">
+              Voir tout <span className="material-icons-round">east</span>
+            </button>
+          </div>
+          <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-4 gap-6">
+            {/* Alger Card */}
+            <div onClick={() => navigate('/trips/search?to=16')} className="group bg-white dark:bg-accent rounded-xl overflow-hidden shadow-lg border border-slate-100 dark:border-white/5 transition-transform hover:scale-[1.02] cursor-pointer">
+              <div className="h-48 relative overflow-hidden">
+                <img alt="Alger" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" src="https://source.unsplash.com/1600x900/?Algiers,skyline,sunset" />
+                <div className="absolute top-4 right-4 bg-background-dark/80 backdrop-blur-md px-3 py-1 rounded-full text-primary font-bold text-xs ring-1 ring-primary/20">POPULAIRE</div>
+              </div>
+              <div className="p-6">
+                <div className="flex items-center gap-2 text-slate-400 mb-2">
+                  <span className="material-icons-round text-sm">route</span>
+                  <span className="text-xs font-bold uppercase tracking-widest">Oran → Alger</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h4 className="text-xl font-bold text-slate-900 dark:text-white">Alger la Blanche</h4>
+                    <p className="text-slate-500 text-sm">À partir de <span className="text-primary font-bold">1,500 DA</span></p>
+                  </div>
+                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-background-dark transition-all">
+                    <span className="material-icons-round">chevron_right</span>
                   </div>
                 </div>
-                <div className="p-6">
-                  <p className="font-black text-slate-900 dark:text-white text-lg italic uppercase tracking-tight">{route.from} → {route.to}</p>
-                  <p className="text-[10px] font-black text-primary mt-2 uppercase tracking-[0.2em]">{route.trips} trajets dispos aujourd'hui</p>
+              </div>
+            </div>
+
+            {/* Constantine Card */}
+            <div onClick={() => navigate('/trips/search?to=25')} className="group bg-white dark:bg-accent rounded-xl overflow-hidden shadow-lg border border-slate-100 dark:border-white/5 transition-transform hover:scale-[1.02] cursor-pointer">
+              <div className="h-48 relative overflow-hidden">
+                <img alt="Constantine" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" src="https://source.unsplash.com/1600x900/?Constantine,Algeria,bridge" />
+              </div>
+              <div className="p-6">
+                <div className="flex items-center gap-2 text-slate-400 mb-2">
+                  <span className="material-icons-round text-sm">route</span>
+                  <span className="text-xs font-bold uppercase tracking-widest">Alger → Constantine</span>
                 </div>
-              </motion.div>
-            ))}
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h4 className="text-xl font-bold text-slate-900 dark:text-white">Constantine</h4>
+                    <p className="text-slate-500 text-sm">À partir de <span className="text-primary font-bold">1,800 DA</span></p>
+                  </div>
+                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-background-dark transition-all">
+                    <span className="material-icons-round">chevron_right</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Oran Card */}
+            <div onClick={() => navigate('/trips/search?to=31')} className="group bg-white dark:bg-accent rounded-xl overflow-hidden shadow-lg border border-slate-100 dark:border-white/5 transition-transform hover:scale-[1.02] cursor-pointer">
+              <div className="h-48 relative overflow-hidden">
+                src="https://source.unsplash.com/1600x900/?Oran,Algeria,sunset"
+              </div>
+              <div className="p-6">
+                <div className="flex items-center gap-2 text-slate-400 mb-2">
+                  <span className="material-icons-round text-sm">route</span>
+                  <span className="text-xs font-bold uppercase tracking-widest">Tlemcen → Oran</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h4 className="text-xl font-bold text-slate-900 dark:text-white">Oran El Bahia</h4>
+                    <p className="text-slate-500 text-sm">À partir de <span className="text-primary font-bold">1,200 DA</span></p>
+                  </div>
+                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-background-dark transition-all">
+                    <span className="material-icons-round">chevron_right</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Ghardaia Card */}
+            <div onClick={() => navigate('/trips/search?to=47')} className="group bg-white dark:bg-accent rounded-xl overflow-hidden shadow-lg border border-slate-100 dark:border-white/5 transition-transform hover:scale-[1.02] cursor-pointer">
+              <div className="h-48 relative overflow-hidden">
+                <img alt="Ghardaia" className="w-full h-full object-cover group-hover:scale-110 transition-transform duration-700" src="https://source.unsplash.com/1600x900/?Ghardaia,Mzab,valley" />
+              </div>
+              <div className="p-6">
+                <div className="flex items-center gap-2 text-slate-400 mb-2">
+                  <span className="material-icons-round text-sm">route</span>
+                  <span className="text-xs font-bold uppercase tracking-widest">Alger → Ghardaia</span>
+                </div>
+                <div className="flex justify-between items-center">
+                  <div>
+                    <h4 className="text-xl font-bold text-slate-900 dark:text-white">Ghardaia</h4>
+                    <p className="text-slate-500 text-sm">À partir de <span className="text-primary font-bold">2,500 DA</span></p>
+                  </div>
+                  <div className="h-10 w-10 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-background-dark transition-all">
+                    <span className="material-icons-round">chevron_right</span>
+                  </div>
+                </div>
+              </div>
+            </div>
+
           </div>
         </div>
       </section>
 
-      {/* Call to Action */}
-      <section className="py-32">
-        <div className="max-w-5xl mx-auto px-6">
-          <div className="bg-slate-900 dark:bg-primary/10 rounded-[4rem] p-16 md:p-24 text-center relative overflow-hidden group">
-            <div className="absolute inset-0 bg-primary/20 opacity-0 group-hover:opacity-100 transition-opacity blur-3xl"></div>
-            <div className="relative z-10 space-y-10">
-              <h2 className="text-4xl md:text-6xl font-black text-white dark:text-primary leading-[1.1] tracking-tight italic">
-                Prêt à partager votre <br /> prochain voyage ?
-              </h2>
-              <p className="text-slate-400 dark:text-slate-300 max-w-xl mx-auto text-lg font-medium italic">
-                Devenez conducteur et amortissez vos frais de route dès aujourd'hui.
-              </p>
-              <div className="flex flex-wrap justify-center gap-6">
-                <Link to="/register" className="bg-primary hover:bg-primary/90 text-slate-900 font-black py-6 px-12 rounded-2xl flex items-center gap-3 transition-all hover:scale-105 active:scale-95 shadow-xl shadow-primary/20 uppercase tracking-widest text-xs">
-                  <PlusCircle className="w-5 h-5" />
-                  Publier un trajet
-                </Link>
-                <Link to="/login" className="bg-white/10 hover:bg-white/20 text-white font-black py-6 px-12 rounded-2xl transition-all uppercase tracking-widest text-xs backdrop-blur-md border border-white/10">
-                  Se connecter
-                </Link>
+      {/* SECURITY/INFO SECTION */}
+      <section className="py-24 max-w-7xl mx-auto px-6 grid grid-cols-1 lg:grid-cols-2 gap-20 items-center">
+        <div className="relative">
+          <div className="aspect-square rounded-3xl overflow-hidden border-2 border-primary/20 shadow-2xl relative z-10">
+            <img
+              alt="Security Illustration"
+              className="w-full h-full object-cover"
+              src="https://lh3.googleusercontent.com/aida-public/AB6AXuBDvEwsnh3UOwMcQ9OMT6BzK0fIk_qo5a6R9RQf8oalPOkJdhESfZ0CzGHHi_oKIHidCrBQzYlKPYWxVsDsPatM3cHWjvCnpeitELcEcRHKb1oMHJNgkqB25fT8xjDecvICSpdwRf2B_SwT2CEnYwY6KmsmVooIulwepEQzqPbn1YqMm6yZKH84DgB1Q2yehmUEv3mNWjiM0SMWnKBNcwftqCLZgSNw2avabx7L1a_YWxYM9wLLdC9RQyv8btzK4x8nKJdX4vRGKXRX"
+              onError={(e) => { e.currentTarget.src = "https://images.unsplash.com/photo-1449965408869-eaa3f722e40d?q=80&w=2070&auto=format&fit=crop" }}
+            />
+            <div className="absolute inset-0 bg-primary/10 mix-blend-multiply"></div>
+          </div>
+          <div className="absolute -top-10 -left-10 w-40 h-40 border-8 border-primary/20 rounded-full z-0"></div>
+          <div className="absolute -bottom-10 -right-10 w-60 h-60 berber-pattern opacity-50 z-0"></div>
+        </div>
+        <div>
+          <h2 className="text-5xl font-display mb-8 leading-tight text-white">VOTRE SÉCURITÉ EST <span className="text-teal">NOTRE PRIORITÉ</span></h2>
+          <div className="space-y-8">
+            <div className="flex gap-6 group">
+              <div className="shrink-0 h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-background-dark transition-colors">
+                <span className="material-icons-round">verified_user</span>
+              </div>
+              <div>
+                <h4 className="text-xl font-bold mb-2 text-white">Identités vérifiées</h4>
+                <p className="text-slate-500 dark:text-slate-400">Chaque membre est vérifié pour garantir une communauté de confiance et de respect mutuel.</p>
+              </div>
+            </div>
+            <div className="flex gap-6 group">
+              <div className="shrink-0 h-12 w-12 rounded-full bg-teal/10 flex items-center justify-center text-teal group-hover:bg-teal group-hover:text-background-dark transition-colors">
+                <span className="material-icons-round">support_agent</span>
+              </div>
+              <div>
+                <h4 className="text-xl font-bold mb-2 text-white">Assistance 24/7</h4>
+                <p className="text-slate-500 dark:text-slate-400">Une équipe locale dédiée pour vous accompagner durant tout votre voyage, partout en Algérie.</p>
+              </div>
+            </div>
+            <div className="flex gap-6 group">
+              <div className="shrink-0 h-12 w-12 rounded-full bg-primary/10 flex items-center justify-center text-primary group-hover:bg-primary group-hover:text-background-dark transition-colors">
+                <span className="material-icons-round">security</span>
+              </div>
+              <div>
+                <h4 className="text-xl font-bold mb-2 text-white">Paiement Sécurisé</h4>
+                <p className="text-slate-500 dark:text-slate-400">Des transactions transparentes et sécurisées via BaridiMob et carte CIB.</p>
               </div>
             </div>
           </div>
+          <button className="mt-12 bg-background-dark dark:bg-white text-white dark:text-background-dark px-8 py-4 rounded-xl font-bold hover:bg-primary dark:hover:bg-primary transition-all flex items-center gap-3">
+            EN SAVOIR PLUS <span className="material-icons-round text-sm">arrow_forward</span>
+          </button>
         </div>
       </section>
-
-      {/* Simple Footer */}
-      <footer className="bg-white dark:bg-[#08110b] border-t border-slate-100 dark:border-slate-800 py-20">
-        <div className="max-w-7xl mx-auto px-6">
-          <div className="grid md:grid-cols-4 gap-16 mb-20">
-            <div className="space-y-6">
-              <div className="flex items-center gap-3 group">
-                <div className="w-10 h-10 bg-primary rounded-xl flex items-center justify-center shadow-lg shadow-primary/20 group-hover:rotate-12 transition-all">
-                  <Navigation className="w-6 h-6 text-slate-900 font-black" />
-                </div>
-                <span className="text-xl font-black text-slate-900 dark:text-white tracking-tighter italic">RohWin<span className="text-primary italic">Bghit</span></span>
-              </div>
-              <p className="text-sm text-slate-500 font-medium leading-relaxed italic">
-                La plateforme de covoiturage la plus fiable d'Algérie. Ensemble, connectons nos villes.
-              </p>
-            </div>
-            <div className="space-y-6">
-              <h4 className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-[0.3em] italic">Top Trajets</h4>
-              <ul className="space-y-3">
-                {['Alger - Oran', 'Alger - Constantine', 'Sétif - Alger', 'Oran - Tlemcen'].map(link => (
-                  <li key={link}><a href="#" className="text-sm text-slate-500 hover:text-primary transition-colors font-medium">{link}</a></li>
-                ))}
-              </ul>
-            </div>
-            <div className="space-y-6">
-              <h4 className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-[0.3em] italic">À propos</h4>
-              <ul className="space-y-3">
-                {['Comment ça marche', 'Sécurité', 'Centre d\'aide', 'Nous contacter'].map(link => (
-                  <li key={link}><a href="#" className="text-sm text-slate-500 hover:text-primary transition-colors font-medium">{link}</a></li>
-                ))}
-              </ul>
-            </div>
-            <div className="space-y-6">
-              <h4 className="text-[10px] font-black text-slate-900 dark:text-white uppercase tracking-[0.3em] italic">Légal</h4>
-              <ul className="space-y-3">
-                {['Conditions d\'utilisation', 'Confidentialité', 'Cookies'].map(link => (
-                  <li key={link}><a href="#" className="text-sm text-slate-500 hover:text-primary transition-colors font-medium">{link}</a></li>
-                ))}
-              </ul>
-            </div>
-          </div>
-          <div className="pt-10 border-t border-slate-50 dark:border-slate-800 flex flex-col md:flex-row justify-between items-center gap-6">
-            <p className="text-[10px] text-slate-400 font-black uppercase tracking-widest italic">© 2024 RohWinBghit. Tous droits réservés.</p>
-            <div className="flex items-center gap-8">
-              <a href="#" className="text-slate-400 hover:text-primary transition-all"><span className="material-symbols-outlined text-2xl font-black italic">language</span></a>
-              <a href="#" className="text-slate-400 hover:text-primary transition-all"><span className="material-symbols-outlined text-2xl font-black italic">share</span></a>
-            </div>
-          </div>
-        </div>
-      </footer>
     </div>
   );
 };

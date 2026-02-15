@@ -27,6 +27,7 @@ import { useQuery } from '@tanstack/react-query'
 import { WILAYA_COORDS } from '../../constants/wilayaCoords'
 import DriverLayout from '../../components/layout/DriverLayout'
 import TripMap from '../../components/trips/TripMap'
+import { useAuthStore } from '../../store/authStore'
 
 const tripSchema = z.object({
   fromWilayaId: z.number().min(1, 'Sélectionnez une wilaya de départ'),
@@ -58,6 +59,7 @@ const PublishTrip = () => {
   const [currentStep, setCurrentStep] = useState(1)
   const [isSubmitting, setIsSubmitting] = useState(false)
   const navigate = useNavigate()
+  const { user } = useAuthStore()
 
   const { data: wilayas } = useQuery({
     queryKey: ['wilayas'],
@@ -175,20 +177,22 @@ const PublishTrip = () => {
       case 1:
         return (
           <div className="space-y-6">
-            <div className="bg-white dark:bg-slate-800/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
-                <MapPin className="text-[#13ec6d]" size={20} />
+            <div className="bg-night-800/80 p-6 rounded-3xl border border-border shadow-card backdrop-blur-md">
+              <h3 className="text-xl font-display text-text-primary mb-6 flex items-center gap-3 tracking-wide">
+                <div className="w-10 h-10 rounded-xl bg-accent-teal/10 flex items-center justify-center border border-accent-teal/20">
+                  <MapPin className="text-accent-teal" size={20} />
+                </div>
                 Où allez-vous ?
               </h3>
 
-              <div className="space-y-4 relative">
+              <div className="space-y-6 relative">
                 {/* Departure */}
                 <div className="relative">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 block">D'où partez-vous ?</label>
+                  <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-text-dim mb-3 block font-mono">D'où partez-vous ?</label>
                   <div className="flex flex-col sm:flex-row gap-4">
                     <select
                       {...register('fromWilayaId', { valueAsNumber: true })}
-                      className="flex-[2] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#13ec6d] outline-none transition-all dark:text-white"
+                      className="flex-[2] bg-night-900 border border-border rounded-xl px-4 py-4 focus:ring-1 focus:ring-accent-teal focus:border-accent-teal outline-none transition-all text-text-primary text-sm font-bold appearance-none"
                     >
                       <option value="">Wilaya de départ</option>
                       {wilayas?.map((w: any) => (
@@ -200,21 +204,21 @@ const PublishTrip = () => {
                     <input
                       {...register('fromCity')}
                       type="text"
-                      className="flex-[3] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#13ec6d] outline-none transition-all dark:text-white"
+                      className="flex-[3] bg-night-900 border border-border rounded-xl px-4 py-4 focus:ring-1 focus:ring-accent-teal focus:border-accent-teal outline-none transition-all text-text-primary text-sm font-bold placeholder:text-text-muted/50"
                       placeholder="Ville / Commune"
                     />
                   </div>
                   {(errors.fromWilayaId || errors.fromCity) && (
-                    <p className="mt-1 text-sm text-red-600">Informations de départ requises</p>
+                    <p className="mt-2 text-xs font-bold text-accent-red uppercase tracking-wide">Informations de départ requises</p>
                   )}
                 </div>
 
                 {/* Swap Button */}
-                <div className="flex justify-center -my-4 relative z-10">
+                <div className="flex justify-center -my-6 relative z-10">
                   <button
                     type="button"
                     onClick={handleSwap}
-                    className="bg-white dark:bg-slate-800 border-2 border-slate-100 dark:border-slate-700 p-2 rounded-full hover:rotate-180 transition-transform duration-500 text-[#13ec6d] shadow-sm active:scale-95"
+                    className="bg-night-900 border border-border p-3 rounded-full hover:rotate-180 transition-all duration-500 text-accent-teal shadow-glow hover:bg-night-800 active:scale-95"
                   >
                     <ArrowRightLeft size={20} className="rotate-90" />
                   </button>
@@ -222,11 +226,11 @@ const PublishTrip = () => {
 
                 {/* Destination */}
                 <div className="relative">
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 block">Quelle est votre destination ?</label>
+                  <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-text-dim mb-3 block font-mono">Quelle est votre destination ?</label>
                   <div className="flex flex-col sm:flex-row gap-4">
                     <select
                       {...register('toWilayaId', { valueAsNumber: true })}
-                      className="flex-[2] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#13ec6d] outline-none transition-all dark:text-white"
+                      className="flex-[2] bg-night-900 border border-border rounded-xl px-4 py-4 focus:ring-1 focus:ring-accent-teal focus:border-accent-teal outline-none transition-all text-text-primary text-sm font-bold appearance-none"
                     >
                       <option value="">Wilaya d'arrivée</option>
                       {wilayas?.map((w: any) => (
@@ -238,12 +242,12 @@ const PublishTrip = () => {
                     <input
                       {...register('toCity')}
                       type="text"
-                      className="flex-[3] bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#13ec6d] outline-none transition-all dark:text-white"
+                      className="flex-[3] bg-night-900 border border-border rounded-xl px-4 py-4 focus:ring-1 focus:ring-accent-teal focus:border-accent-teal outline-none transition-all text-text-primary text-sm font-bold placeholder:text-text-muted/50"
                       placeholder="Ville / Commune"
                     />
                   </div>
                   {(errors.toWilayaId || errors.toCity) && (
-                    <p className="mt-1 text-sm text-red-600">Informations d'arrivée requises</p>
+                    <p className="mt-2 text-xs font-bold text-accent-red uppercase tracking-wide">Informations d'arrivée requises</p>
                   )}
                 </div>
               </div>
@@ -254,57 +258,61 @@ const PublishTrip = () => {
       case 2:
         return (
           <div className="space-y-6">
-            <div className="bg-white dark:bg-slate-800/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
-                <Calendar className="text-[#13ec6d]" size={20} />
+            <div className="bg-night-800/80 p-6 rounded-3xl border border-border shadow-card backdrop-blur-md">
+              <h3 className="text-xl font-display text-text-primary mb-6 flex items-center gap-3 tracking-wide">
+                <div className="w-10 h-10 rounded-xl bg-accent-teal/10 flex items-center justify-center border border-accent-teal/20">
+                  <Calendar className="text-accent-teal" size={20} />
+                </div>
                 Planification
               </h3>
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 block flex items-center">
-                    <Calendar size={14} className="mr-2" />
+                  <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-text-dim mb-3 block flex items-center font-mono">
+                    <Calendar size={12} className="mr-2" />
                     Date de départ
                   </label>
                   <input
                     {...register('departureDate')}
                     type="date"
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#13ec6d] outline-none transition-all dark:text-white"
+                    className="w-full bg-night-900 border border-border rounded-xl px-4 py-4 focus:ring-1 focus:ring-accent-teal focus:border-accent-teal outline-none transition-all text-text-primary text-sm font-bold dark-date-input"
                     min={new Date().toISOString().split('T')[0]}
                   />
                   {errors.departureDate && (
-                    <p className="mt-1 text-sm text-red-600">{errors.departureDate.message}</p>
+                    <p className="mt-2 text-xs font-bold text-accent-red uppercase tracking-wide">{errors.departureDate.message}</p>
                   )}
                 </div>
                 <div>
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 block flex items-center">
-                    <Clock size={14} className="mr-2" />
+                  <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-text-dim mb-3 block flex items-center font-mono">
+                    <Clock size={12} className="mr-2" />
                     Heure de départ
                   </label>
                   <input
                     {...register('departureTime')}
                     type="time"
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#13ec6d] outline-none transition-all dark:text-white"
+                    className="w-full bg-night-900 border border-border rounded-xl px-4 py-4 focus:ring-1 focus:ring-accent-teal focus:border-accent-teal outline-none transition-all text-text-primary text-sm font-bold dark-time-input"
                   />
                   {errors.departureTime && (
-                    <p className="mt-1 text-sm text-red-600">{errors.departureTime.message}</p>
+                    <p className="mt-2 text-xs font-bold text-accent-red uppercase tracking-wide">{errors.departureTime.message}</p>
                   )}
                 </div>
               </div>
             </div>
 
-            <div className="bg-white dark:bg-slate-800/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
-                <Banknote className="text-[#13ec6d]" size={20} />
+            <div className="bg-night-800/80 p-6 rounded-3xl border border-border shadow-card backdrop-blur-md">
+              <h3 className="text-xl font-display text-text-primary mb-6 flex items-center gap-3 tracking-wide">
+                <div className="w-10 h-10 rounded-xl bg-accent-teal/10 flex items-center justify-center border border-accent-teal/20">
+                  <Banknote className="text-accent-teal" size={20} />
+                </div>
                 Capacité & Prix
               </h3>
               <div className="grid md:grid-cols-2 gap-6">
                 <div>
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 block flex items-center">
-                    <UsersIcon size={14} className="mr-2" />
+                  <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-text-dim mb-3 block flex items-center font-mono">
+                    <UsersIcon size={12} className="mr-2" />
                     Places disponibles
                   </label>
                   <select {...register('availableSeats', { valueAsNumber: true })}
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#13ec6d] outline-none transition-all dark:text-white"
+                    className="w-full bg-night-900 border border-border rounded-xl px-4 py-4 focus:ring-1 focus:ring-accent-teal focus:border-accent-teal outline-none transition-all text-text-primary text-sm font-bold appearance-none"
                   >
                     {[1, 2, 3, 4, 5, 6, 7, 8].map((n) => (
                       <option key={n} value={n}>
@@ -314,19 +322,19 @@ const PublishTrip = () => {
                   </select>
                 </div>
                 <div>
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 block flex items-center">
-                    <Banknote size={14} className="mr-2" />
+                  <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-text-dim mb-3 block flex items-center font-mono">
+                    <Banknote size={12} className="mr-2" />
                     Prix par place (DZD)
                   </label>
                   <input
                     {...register('pricePerSeat', { valueAsNumber: true })}
                     type="number"
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#13ec6d] outline-none transition-all dark:text-white"
+                    className="w-full bg-night-900 border border-border rounded-xl px-4 py-4 focus:ring-1 focus:ring-accent-teal focus:border-accent-teal outline-none transition-all text-text-primary text-sm font-bold"
                     min="100"
                     step="50"
                   />
                   {errors.pricePerSeat && (
-                    <p className="mt-1 text-sm text-red-600">{errors.pricePerSeat.message}</p>
+                    <p className="mt-2 text-xs font-bold text-accent-red uppercase tracking-wide">{errors.pricePerSeat.message}</p>
                   )}
                 </div>
               </div>
@@ -337,18 +345,20 @@ const PublishTrip = () => {
       case 3:
         return (
           <div className="space-y-6">
-            <div className="bg-white dark:bg-slate-800/50 p-6 rounded-2xl border border-slate-100 dark:border-slate-800 shadow-sm">
-              <h3 className="text-lg font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
-                <Car className="text-[#13ec6d]" size={20} />
+            <div className="bg-night-800/80 p-6 rounded-3xl border border-border shadow-card backdrop-blur-md">
+              <h3 className="text-xl font-display text-text-primary mb-6 flex items-center gap-3 tracking-wide">
+                <div className="w-10 h-10 rounded-xl bg-accent-teal/10 flex items-center justify-center border border-accent-teal/20">
+                  <Car className="text-accent-teal" size={20} />
+                </div>
                 Véhicule & Options
               </h3>
               <div className="space-y-6">
                 <div>
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 block flex items-center">
+                  <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-text-dim mb-3 block flex items-center font-mono">
                     Véhicule
                   </label>
                   <select {...register('vehicleId')}
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#13ec6d] outline-none transition-all dark:text-white"
+                    className="w-full bg-night-900 border border-border rounded-xl px-4 py-4 focus:ring-1 focus:ring-accent-teal focus:border-accent-teal outline-none transition-all text-text-primary text-sm font-bold appearance-none"
                   >
                     <option value="">Sélectionnez un véhicule</option>
                     {vehicles?.map((v: any) => (
@@ -358,7 +368,12 @@ const PublishTrip = () => {
                     ))}
                   </select>
                   {errors.vehicleId && (
-                    <p className="mt-1 text-sm text-red-600">{errors.vehicleId.message}</p>
+                    <p className="mt-2 text-xs font-bold text-accent-red uppercase tracking-wide">{errors.vehicleId.message}</p>
+                  )}
+                  {(!vehicles || vehicles.length === 0) && (
+                    <p className="mt-2 text-xs text-text-muted italic flex items-center gap-2">
+                      <Info size={14} /> Vous n'avez pas encore ajouté de véhicule.
+                    </p>
                   )}
                 </div>
 
@@ -369,26 +384,26 @@ const PublishTrip = () => {
                     { name: 'petsAllowed', icon: PawPrint, label: 'Animaux acceptés' },
                     { name: 'instantBooking', icon: Zap, label: 'Réservation instantanée' },
                   ].map((pref) => (
-                    <label key={pref.name} className="flex items-center p-4 border border-slate-200 dark:border-slate-700/50 rounded-xl cursor-pointer hover:bg-slate-50 dark:hover:bg-slate-800/20 transition-all group">
+                    <label key={pref.name} className="flex items-center p-4 border border-border bg-night-900/50 rounded-xl cursor-pointer hover:bg-night-800 hover:border-accent-teal/50 transition-all group">
                       <input
                         //@ts-ignore
                         {...register(pref.name)}
                         type="checkbox"
-                        className="w-5 h-5 text-[#13ec6d] border-slate-300 dark:border-slate-700 rounded focus:ring-[#13ec6d]"
+                        className="w-5 h-5 text-accent-teal border-border rounded focus:ring-accent-teal bg-night-900"
                       />
-                      <pref.icon className="w-5 h-5 ml-4 text-slate-400 group-hover:text-[#13ec6d] transition-colors" />
-                      <span className="ml-3 text-slate-700 dark:text-slate-300 font-medium">{pref.label}</span>
+                      <pref.icon className="w-5 h-5 ml-4 text-text-muted group-hover:text-accent-teal transition-colors" />
+                      <span className="ml-3 text-text-primary text-sm font-bold">{pref.label}</span>
                     </label>
                   ))}
                 </div>
 
                 <div>
-                  <label className="text-xs font-bold uppercase tracking-wider text-slate-400 mb-2 block flex items-center">
+                  <label className="text-[10px] font-bold uppercase tracking-[0.2em] text-text-dim mb-3 block flex items-center font-mono">
                     Description (optionnel)
                   </label>
                   <textarea
                     {...register('description')}
-                    className="w-full bg-slate-50 dark:bg-slate-900 border border-slate-200 dark:border-slate-700 rounded-xl px-4 py-3 focus:ring-2 focus:ring-[#13ec6d] outline-none transition-all dark:text-white h-24 resize-none"
+                    className="w-full bg-night-900 border border-border rounded-xl px-4 py-4 focus:ring-1 focus:ring-accent-teal focus:border-accent-teal outline-none transition-all text-text-primary text-sm font-bold h-32 resize-none placeholder:text-text-muted/50 leading-relaxed"
                     placeholder="Informations complémentaires pour les passagers..."
                   />
                 </div>
@@ -400,13 +415,13 @@ const PublishTrip = () => {
       case 4:
         return (
           <div className="space-y-6">
-            <div className="bg-[#13ec6d]/5 dark:bg-[#13ec6d]/10 rounded-2xl p-8 border border-[#13ec6d]/20">
-              <h3 className="text-xl font-bold text-slate-900 dark:text-white mb-6 flex items-center gap-2">
-                <CheckCircle className="text-[#13ec6d]" size={20} />
+            <div className="bg-gradient-to-br from-accent-teal/10 to-transparent rounded-3xl p-8 border border-accent-teal/20 backdrop-blur-md">
+              <h3 className="text-2xl font-display text-text-primary mb-8 flex items-center gap-3 tracking-wide">
+                <CheckCircle className="text-accent-teal" size={24} />
                 Récapitulatif de votre trajet
               </h3>
 
-              <div className="space-y-4">
+              <div className="space-y-6">
                 {[
                   { label: 'Départ', value: `${wilayas?.find((w: any) => w.code === formData.fromWilayaId)?.name} - ${formData.fromCity}` },
                   { label: 'Arrivée', value: `${wilayas?.find((w: any) => w.code === formData.toWilayaId)?.name} - ${formData.toCity}` },
@@ -415,28 +430,28 @@ const PublishTrip = () => {
                   { label: 'Places', value: formData.availableSeats },
                   { label: 'Véhicule', value: vehicles?.find((v: any) => v.id === formData.vehicleId) ? `${vehicles.find((v: any) => v.id === formData.vehicleId).make} ${vehicles.find((v: any) => v.id === formData.vehicleId).model}` : 'Non sélectionné' },
                 ].map((row, i) => (
-                  <div key={i} className="flex justify-between items-center py-2 border-b border-slate-200 dark:border-slate-800 last:border-0 capitalize">
-                    <span className="text-slate-500 dark:text-slate-400 text-sm font-medium">{row.label}:</span>
-                    <span className="font-bold text-slate-900 dark:text-white">{row.value}</span>
+                  <div key={i} className="flex justify-between items-center py-3 border-b border-white/5 last:border-0 capitalize group">
+                    <span className="text-text-muted text-sm font-bold font-mono tracking-wide">{row.label}:</span>
+                    <span className="font-bold text-text-primary text-right pl-4">{row.value}</span>
                   </div>
                 ))}
 
-                <div className="flex justify-between items-center bg-white dark:bg-slate-900 p-4 rounded-xl shadow-sm border border-[#13ec6d]/10 mt-6">
+                <div className="flex justify-between items-center bg-night-900 p-6 rounded-2xl shadow-lg border border-border mt-8 hover:border-accent-teal/30 transition-all">
                   <div>
-                    <span className="text-slate-400 text-[10px] uppercase font-bold tracking-widest">Revenu estimé</span>
-                    <p className="text-2xl font-extrabold text-[#13ec6d]">{(formData.pricePerSeat || 0) * (formData.availableSeats || 0)} <span className="text-xs font-bold">DZD</span></p>
+                    <span className="text-text-dim text-[10px] uppercase font-bold tracking-widest font-mono block mb-1">Revenu estimé</span>
+                    <p className="text-3xl font-display text-accent-teal tracking-wide">{(formData.pricePerSeat || 0) * (formData.availableSeats || 0)} <span className="text-xs font-bold font-sans opacity-60">DZD</span></p>
                   </div>
                   <div className="text-right">
-                    <span className="text-slate-400 text-[10px] uppercase font-bold tracking-widest">Par place</span>
-                    <p className="text-lg font-bold text-slate-900 dark:text-white uppercase">{formData.pricePerSeat} DZD</p>
+                    <span className="text-text-dim text-[10px] uppercase font-bold tracking-widest font-mono block mb-1">Par place</span>
+                    <p className="text-lg font-bold text-text-primary uppercase">{formData.pricePerSeat} DZD</p>
                   </div>
                 </div>
               </div>
             </div>
 
-            <div className="flex items-start space-x-3 bg-amber-500/10 p-4 rounded-xl border border-amber-500/20">
-              <Info className="w-5 h-5 text-amber-500 mt-1 shrink-0" />
-              <p className="text-xs leading-relaxed text-amber-600 dark:text-amber-500 font-medium">
+            <div className="flex items-start space-x-3 bg-accent-orange/5 p-4 rounded-xl border border-accent-orange/10">
+              <Info className="w-5 h-5 text-accent-orange mt-1 shrink-0" />
+              <p className="text-xs leading-relaxed text-accent-orange font-bold">
                 En publiant ce trajet, vous acceptez nos conditions d'utilisation.
                 Une fois publié, les passagers pourront réserver instantanément ou sur demande selon vos réglages.
               </p>
@@ -451,35 +466,35 @@ const PublishTrip = () => {
 
   return (
     <DriverLayout fullContent>
-      <div className="flex min-h-[calc(100vh-80px)] overflow-hidden">
+      <div className="flex min-h-[calc(100vh-80px)] overflow-hidden font-body text-text-primary">
         {/* Left Column: Form Section */}
-        <div className="w-full lg:w-1/2 p-8 overflow-y-auto max-h-[calc(100vh-80px)] scrollbar-hide">
+        <div className="w-full lg:w-1/2 p-8 overflow-y-auto max-h-[calc(100vh-80px)] scrollbar-hide dark-scrollbar">
           <div className="max-w-xl mx-auto">
             {/* Header */}
             <div className="mb-10">
-              <h1 className="text-3xl font-extrabold text-slate-900 dark:text-white mb-2">Publier un trajet</h1>
-              <p className="text-slate-500 dark:text-slate-400 font-medium">Partagez votre voyage et économisez sur les frais.</p>
+              <h1 className="text-4xl font-display text-text-primary mb-2 tracking-wide">PUBLIER UN <span className="text-accent-teal">TRAJET</span></h1>
+              <p className="text-text-muted font-medium text-lg">Partagez votre voyage et économisez sur les frais.</p>
             </div>
 
             {/* Progress Steps */}
             <div className="mb-12 relative flex items-center justify-between">
-              <div className="absolute top-6 left-0 w-full h-0.5 bg-slate-200 dark:bg-slate-800 -z-0"></div>
+              <div className="absolute top-6 left-0 w-full h-0.5 bg-border -z-0"></div>
               {steps.map((step) => {
                 const Icon = step.icon;
                 const isCompleted = currentStep > step.id;
                 const isActive = currentStep === step.id;
 
                 return (
-                  <div key={step.id} className="flex flex-col items-center gap-2 relative z-10 bg-[#f5f8f5] dark:bg-[#0f230f] px-2">
+                  <div key={step.id} className="flex flex-col items-center gap-3 relative z-10 bg-night-900 px-3 py-2 rounded-xl border border-transparent">
                     <div
-                      className={`flex items-center justify-center w-12 h-12 rounded-2xl transition-all duration-300 ${isCompleted || isActive
-                        ? 'bg-[#13ec6d] text-white shadow-lg shadow-[#13ec6d]/20'
-                        : 'bg-white dark:bg-slate-800 text-slate-400 border border-slate-200 dark:border-slate-700'
+                      className={`flex items-center justify-center w-12 h-12 rounded-xl transition-all duration-300 ${isCompleted || isActive
+                        ? 'bg-accent-teal text-night-900 shadow-glow'
+                        : 'bg-night-800 text-text-muted border border-border'
                         }`}
                     >
                       <Icon size={20} />
                     </div>
-                    <span className={`text-[10px] uppercase font-bold tracking-widest ${isActive ? 'text-[#13ec6d]' : 'text-slate-400'}`}>{step.title}</span>
+                    <span className={`text-[9px] uppercase font-bold tracking-widest font-mono ${isActive ? 'text-accent-teal' : 'text-text-dim'}`}>{step.title}</span>
                   </div>
                 )
               })}
@@ -492,6 +507,7 @@ const PublishTrip = () => {
                   key={currentStep}
                   initial={{ opacity: 0, y: 10 }}
                   animate={{ opacity: 1, y: 0 }}
+                  exit={{ opacity: 0, y: -10 }}
                   transition={{ duration: 0.3 }}
                 >
                   {renderStepContent()}
@@ -499,38 +515,38 @@ const PublishTrip = () => {
               </AnimatePresence>
 
               {/* Navigation Buttons */}
-              <div className="flex justify-between items-center mt-12 pt-8 border-t border-slate-200 dark:border-slate-800">
+              <div className="flex justify-between items-center mt-12 pt-8 border-t border-border">
                 <button
                   type="button"
                   onClick={prevStep}
                   disabled={currentStep === 1}
-                  className="flex items-center gap-2 text-slate-500 dark:text-slate-400 hover:text-slate-900 dark:hover:text-white font-bold transition-colors disabled:opacity-30"
+                  className="flex items-center gap-2 text-text-muted hover:text-text-primary font-bold transition-colors disabled:opacity-30 disabled:cursor-not-allowed group"
                 >
-                  <ChevronLeft size={20} />
-                  Retour
+                  <ChevronLeft size={20} className="group-hover:-translate-x-1 transition-transform" />
+                  RETOUR
                 </button>
 
                 {currentStep < steps.length ? (
                   <button
                     type="button"
                     onClick={nextStep}
-                    className="bg-[#13ec6d] text-white px-8 py-4 rounded-xl font-bold hover:shadow-xl hover:shadow-[#13ec6d]/30 transition-all flex items-center gap-2 transform hover:-translate-y-0.5 active:scale-95"
+                    className="bg-accent-teal text-night-900 px-8 py-4 rounded-xl font-bold hover:shadow-glow transition-all flex items-center gap-2 transform hover:-translate-y-0.5 active:scale-95 border border-accent-teal/50"
                   >
-                    Continuer
+                    CONTINUER
                     <ChevronRight size={20} />
                   </button>
                 ) : (
                   <button
                     type="submit"
                     disabled={isSubmitting}
-                    className="bg-[#13ec6d] text-white px-10 py-4 rounded-xl font-bold hover:shadow-xl hover:shadow-[#13ec6d]/30 transition-all flex items-center gap-2 transform hover:-translate-y-0.5 active:scale-95 disabled:opacity-50"
+                    className="bg-accent-teal text-night-900 px-10 py-4 rounded-xl font-bold hover:shadow-glow transition-all flex items-center gap-2 transform hover:-translate-y-0.5 active:scale-95 disabled:opacity-50 disabled:cursor-not-allowed border border-accent-teal/50"
                   >
                     {isSubmitting ? (
-                      <div className="w-6 h-6 border-2 border-white/50 border-t-white rounded-full animate-spin" />
+                      <div className="w-5 h-5 border-2 border-night-900/50 border-t-night-900 rounded-full animate-spin" />
                     ) : (
                       <>
                         <CheckCircle size={20} />
-                        Publier mon trajet
+                        PUBLIER
                       </>
                     )}
                   </button>
@@ -541,12 +557,14 @@ const PublishTrip = () => {
         </div>
 
         {/* Right Column: Map Preview Section */}
-        <div className="hidden lg:block lg:w-1/2 p-8 bg-[#f5f8f5] dark:bg-[#0f230f]">
-          <div className="sticky top-8 h-[750px] w-full rounded-[2.5rem] overflow-hidden shadow-2xl border border-slate-200 dark:border-slate-800 bg-slate-100 dark:bg-slate-900">
+        <div className="hidden lg:block lg:w-1/2 p-8 bg-transparent relative">
+          <div className="absolute inset-0 bg-gradient-to-l from-transparent via-transparent to-transparent z-10 pointer-events-none"></div>
+          <div className="sticky top-8 h-[calc(100vh-64px)] w-full rounded-[2.5rem] overflow-hidden shadow-2xl border border-border bg-night-800/80 backdrop-blur-md relative z-0">
             <TripMap
               fromWilayaId={formData.fromWilayaId}
               toWilayaId={formData.toWilayaId}
               departureTime={formData.departureTime}
+              darkMode={true}
             />
           </div>
         </div>

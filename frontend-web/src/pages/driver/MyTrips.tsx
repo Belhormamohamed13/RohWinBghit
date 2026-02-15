@@ -41,90 +41,115 @@ const MyTrips = () => {
 
     return (
         <DriverLayout>
-            <div className="animate-fade-in">
-                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-12 gap-6">
+            <div className="min-h-screen text-white p-6 md:p-10 animate-fade-in font-body">
+                {/* Header */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
                     <div>
-                        <h1 className="text-3xl font-black text-slate-900 dark:text-white tracking-tight italic">Mes Trajets</h1>
-                        <p className="mt-2 text-[10px] font-black text-slate-400 uppercase tracking-widest">GÉREZ VOS TRAJETS PUBLIÉS ET VOS RÉSERVATIONS</p>
+                        <h1 className="font-bebas text-5xl tracking-wide text-accent-teal mb-2">
+                            MY TRIPS
+                        </h1>
+                        <p className="text-white/60 font-almarai text-lg">
+                            Manage your published and completed trips
+                        </p>
                     </div>
                     <button
                         onClick={() => navigate('/driver/publish')}
-                        className="flex items-center gap-3 bg-[#13ec6d] text-slate-900 px-8 py-4 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-[#13ec6d]/20 hover:scale-[1.03] active:scale-95 transition-all"
+                        className="flex items-center gap-3 bg-accent-teal text-night-900 px-8 py-4 rounded-full font-bold text-sm uppercase tracking-widest shadow-glow hover:scale-105 active:scale-95 transition-all"
                     >
                         <Plus className="w-5 h-5" />
-                        Publier un trajet
+                        Publish Trip
                     </button>
                 </div>
 
+                {/* Tabs */}
+                <div className="flex flex-wrap gap-3 mb-10">
+                    {['Upcoming', 'Completed', 'Cancelled'].map((tab, idx) => (
+                        <button
+                            key={tab}
+                            className={`px-8 py-3 rounded-full text-xs font-bold uppercase tracking-widest transition-all border ${idx === 0
+                                ? 'bg-accent-teal text-night-900 border-accent-teal shadow-glow'
+                                : 'bg-white/5 border-white/10 text-white/60 hover:bg-accent-teal/20 hover:text-accent-teal hover:border-accent-teal/30'
+                                }`}
+                        >
+                            {tab}
+                        </button>
+                    ))}
+                </div>
+
                 {trips && trips.length > 0 ? (
-                    <div className="grid gap-8">
+                    <div className="grid gap-6">
                         {trips.map((trip: any) => (
                             <motion.div
                                 key={trip.id}
                                 initial={{ opacity: 0, y: 10 }}
                                 animate={{ opacity: 1, y: 0 }}
-                                className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-xl rounded-[2.5rem] border border-white dark:border-slate-800 shadow-soft hover:shadow-elevated transition-all group overflow-hidden"
+                                className="bg-white/5 backdrop-blur-xl border border-white/10 p-6 md:p-8 rounded-2xl hover:border-accent-teal/50 hover:bg-accent-teal/5 transition-all group cursor-pointer"
                                 onClick={() => navigate(`/driver/trips/${trip.id}/manage`)}
                             >
-                                <div className="p-8">
-                                    <div className="flex flex-col lg:flex-row justify-between items-stretch gap-10">
-                                        <div className="flex-1 space-y-8">
-                                            {/* Route Display */}
-                                            <div className="flex gap-8 items-center pt-2">
-                                                <div className="flex flex-col items-center gap-2">
-                                                    <div className="w-3 h-3 rounded-full border-2 border-[#13ec6d]"></div>
-                                                    <div className="w-[1px] h-10 bg-slate-200 dark:bg-slate-700 border-dashed border-l-2"></div>
-                                                    <div className="w-3 h-3 rounded-full bg-[#13ec6d]"></div>
+                                <div className="flex flex-col lg:flex-row justify-between items-stretch gap-8">
+                                    <div className="flex-1">
+                                        {/* Trip Header: Date & Status */}
+                                        <div className="flex flex-wrap justify-between items-start mb-6 gap-4">
+                                            <div className="flex flex-col">
+                                                <div className="flex items-center gap-2 text-accent-teal mb-1">
+                                                    <Calendar className="w-4 h-4" />
+                                                    <span className="font-jetbrains text-sm uppercase tracking-wider font-bold">
+                                                        {DateUtil.getTripDateDisplay(trip.departure_time)}
+                                                    </span>
                                                 </div>
-                                                <div className="flex flex-col gap-8">
-                                                    <div>
-                                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">DÉPART</p>
-                                                        <p className="text-lg font-black text-slate-900 dark:text-white tracking-tight">{getWilayaName(trip.from_wilaya_id)} - {trip.from_city}</p>
-                                                    </div>
-                                                    <div>
-                                                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">ARRIVÉE</p>
-                                                        <p className="text-lg font-black text-slate-900 dark:text-white tracking-tight">{getWilayaName(trip.to_wilaya_id)} - {trip.to_city}</p>
-                                                    </div>
+                                                <div className="flex items-center gap-2 text-white/60">
+                                                    <Clock className="w-4 h-4" />
+                                                    <span className="font-jetbrains text-xs">
+                                                        {DateUtil.formatTime(trip.departure_time)}
+                                                    </span>
                                                 </div>
                                             </div>
 
-                                            {/* Info Chips */}
-                                            <div className="flex flex-wrap gap-4 pt-4 border-t border-slate-50 dark:border-slate-800/50">
-                                                <div className="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-widest bg-slate-50 dark:bg-slate-800 px-4 py-2 rounded-xl">
-                                                    <Calendar className="w-4 h-4 text-[#13ec6d]" />
-                                                    {DateUtil.getTripDateDisplay(trip.departure_time)}
-                                                </div>
-                                                <div className="flex items-center gap-2 text-[10px] font-black text-slate-500 uppercase tracking-widest bg-slate-50 dark:bg-slate-800 px-4 py-2 rounded-xl">
-                                                    <Clock className="w-4 h-4 text-[#13ec6d]" />
-                                                    {DateUtil.formatTime(trip.departure_time)}
-                                                </div>
-                                                <div className={`flex items-center gap-2 text-[10px] font-black uppercase tracking-widest px-4 py-2 rounded-xl ${trip.available_seats === 0 ? 'bg-red-500/10 text-red-500 border border-red-500/20' : 'bg-slate-50 dark:bg-slate-800 text-slate-500'}`}>
-                                                    <Users className={`w-4 h-4 ${trip.available_seats === 0 ? 'text-red-500' : 'text-[#13ec6d]'}`} />
-                                                    {trip.available_seats === 0 ? 'COMPLET' : `${trip.available_seats} places libres`}
-                                                </div>
+                                            <span className={`px-4 py-1.5 rounded-full text-[10px] font-bold uppercase tracking-widest glass-effect border ${trip.status === 'active' || trip.status === 'scheduled' ? 'bg-accent-teal/10 text-accent-teal border-accent-teal/20' :
+                                                trip.status === 'completed' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
+                                                    'bg-red-500/10 text-red-500 border-red-500/20'
+                                                }`}>
+                                                {trip.status === 'active' || trip.status === 'scheduled' ? 'Scheduled' :
+                                                    trip.status === 'completed' ? 'Completed' : 'Cancelled'}
+                                            </span>
+                                        </div>
+
+                                        {/* Route Visual */}
+                                        <div className="relative pl-8 border-l border-white/10 ml-2 space-y-8">
+                                            <div className="relative">
+                                                <div className="absolute -left-[41px] top-1 w-5 h-5 rounded-full border-4 border-night-900 bg-accent-teal shadow-glow"></div>
+                                                <p className="text-xs font-mono text-white/40 uppercase tracking-widest mb-1">From</p>
+                                                <h3 className="text-2xl font-bebas tracking-wide text-white">{getWilayaName(trip.from_wilaya_id)}</h3>
+                                                <p className="text-sm text-white/60">{trip.from_city}</p>
+                                            </div>
+                                            <div className="relative">
+                                                <div className="absolute -left-[41px] top-1 w-5 h-5 rounded-full border-4 border-night-900 bg-white shadow-lg"></div>
+                                                <p className="text-xs font-mono text-white/40 uppercase tracking-widest mb-1">To</p>
+                                                <h3 className="text-2xl font-bebas tracking-wide text-white">{getWilayaName(trip.to_wilaya_id)}</h3>
+                                                <p className="text-sm text-white/60">{trip.to_city}</p>
+                                            </div>
+                                        </div>
+                                    </div>
+
+                                    {/* Right Section: Stats & Action */}
+                                    <div className="flex flex-row lg:flex-col items-center lg:items-end justify-between lg:justify-center gap-6 lg:pl-10 lg:border-l lg:border-white/5 min-w-[200px]">
+                                        <div className="text-right">
+                                            <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1 font-mono">Estimated Earnings</p>
+                                            <p className="text-3xl font-bebas tracking-wide text-accent-teal">
+                                                {(Number(trip.price_per_seat) * (trip.total_seats || 3)).toLocaleString()} <span className="text-xs text-white/40 font-sans">DZD</span>
+                                            </p>
+                                        </div>
+
+                                        <div className="text-right">
+                                            <p className="text-[10px] font-bold text-white/40 uppercase tracking-widest mb-1 font-mono">Seats</p>
+                                            <div className={`flex items-center gap-2 justify-end ${trip.available_seats === 0 ? 'text-red-400' : 'text-white'}`}>
+                                                <Users className="w-4 h-4" />
+                                                <span className="font-mono font-bold">{trip.available_seats} / {trip.total_seats || 3} left</span>
                                             </div>
                                         </div>
 
-                                        <div className="flex flex-row lg:flex-col items-center lg:items-end justify-between lg:justify-center gap-6 py-6 lg:py-4 lg:pl-12 lg:border-l lg:border-dashed lg:border-slate-200 dark:lg:border-slate-800 min-w-[200px]">
-                                            <div className="text-right">
-                                                <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mb-1">REVENU TOTAL</p>
-                                                <p className="text-3xl font-black text-[#13ec6d] tracking-tighter italic">
-                                                    {(Number(trip.price_per_seat) * (trip.total_seats || trip.available_seats)).toLocaleString()} <span className="text-sm font-normal text-slate-400 not-italic ml-1">DZD</span>
-                                                </p>
-                                            </div>
-
-                                            <div className="flex items-center gap-4">
-                                                <span className={`px-4 py-1.5 rounded-full text-[10px] font-black uppercase tracking-[0.2em] border ${trip.status === 'active' ? 'bg-[#13ec6d]/10 text-[#13ec6d] border-[#13ec6d]/20' :
-                                                    trip.status === 'completed' ? 'bg-blue-500/10 text-blue-500 border-blue-500/20' :
-                                                        'bg-red-500/10 text-red-500 border-red-500/20'
-                                                    }`}>
-                                                    {trip.status === 'active' ? 'En ligne' :
-                                                        trip.status === 'completed' ? 'Terminé' : 'Annulé'}
-                                                </span>
-                                                <div className="w-10 h-10 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-xl flex items-center justify-center group-hover:translate-x-1 transition-transform">
-                                                    <ChevronRight className="w-5 h-5" />
-                                                </div>
-                                            </div>
+                                        <div className="w-10 h-10 rounded-full border border-white/10 flex items-center justify-center text-white/40 group-hover:bg-accent-teal group-hover:text-night-900 group-hover:border-accent-teal transition-all">
+                                            <ChevronRight className="w-5 h-5" />
                                         </div>
                                     </div>
                                 </div>
@@ -132,19 +157,19 @@ const MyTrips = () => {
                         ))}
                     </div>
                 ) : (
-                    <div className="text-center py-24 bg-white/50 dark:bg-slate-900/30 rounded-[3rem] border-2 border-dashed border-slate-200 dark:border-slate-800 mx-auto max-w-2xl px-12">
-                        <div className="w-24 h-24 bg-slate-100 dark:bg-slate-800 rounded-[2rem] flex items-center justify-center mx-auto mb-8 shadow-inner">
-                            <AlertCircle className="w-12 h-12 text-slate-300" />
+                    <div className="text-center py-24 bg-white/5 backdrop-blur-md rounded-[2rem] border border-dashed border-white/10 mx-auto max-w-2xl px-12">
+                        <div className="w-20 h-20 bg-white/5 rounded-full flex items-center justify-center mx-auto mb-8 border border-white/10">
+                            <AlertCircle className="w-10 h-10 text-white/20" />
                         </div>
-                        <h3 className="text-2xl font-black text-slate-900 dark:text-white mb-3 tracking-tight italic">Aucun trajet trouvé</h3>
-                        <p className="text-slate-500 font-medium italic mb-10">
-                            Vous n'avez pas encore publié de trajet. Partagez votre voyage pour commencer à gagner.
+                        <h3 className="text-3xl font-bebas text-white mb-3 tracking-wide">NO TRIPS FOUND</h3>
+                        <p className="text-white/60 font-body mb-10 max-w-md mx-auto">
+                            You haven't published any trips yet. Share your journey and start earning today.
                         </p>
                         <button
                             onClick={() => navigate('/driver/publish')}
-                            className="bg-[#13ec6d] text-slate-900 px-10 py-5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-[#13ec6d]/20 hover:scale-105 active:scale-95 transition-all"
+                            className="bg-accent-teal text-night-900 px-10 py-4 rounded-full font-bold text-xs uppercase tracking-widest shadow-glow hover:scale-105 active:scale-95 transition-all"
                         >
-                            Publier mon premier trajet
+                            Publish First Trip
                         </button>
                     </div>
                 )}

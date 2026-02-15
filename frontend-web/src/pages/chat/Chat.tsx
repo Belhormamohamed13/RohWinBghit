@@ -13,7 +13,6 @@ interface ChatProps {
     noLayout?: boolean;
 }
 
-// Define wrapper component outside to prevent re-renders
 const ChatLayout: React.FC<{ user: any, noLayout?: boolean, children: React.ReactNode }> = ({ user, noLayout, children }) => {
     if (noLayout) return <React.Fragment>{children}</React.Fragment>;
     if (user?.role === 'driver') return <DriverLayout>{children}</DriverLayout>;
@@ -30,6 +29,12 @@ const Chat: React.FC<ChatProps> = ({ noLayout }) => {
     const messagesEndRef = useRef<HTMLDivElement>(null);
     const [isMobileListVisible, setIsMobileListVisible] = useState(!targetUserId);
 
+    const isDriver = user?.role === 'driver';
+    const accentColor = isDriver ? 'accent-teal' : 'sand-300';
+    const accentText = isDriver ? 'text-accent-teal' : 'text-sand-300';
+    const accentBg = isDriver ? 'bg-accent-teal' : 'bg-sand-300';
+    const accentBorder = isDriver ? 'border-accent-teal' : 'border-sand-300';
+
     // Fetch all user chats
     const { data: chats, isLoading: chatsLoading } = useQuery({
         queryKey: ['chats'],
@@ -37,40 +42,35 @@ const Chat: React.FC<ChatProps> = ({ noLayout }) => {
             const response = await chatApi.getChats();
             return response.data.data;
         },
-        refetchInterval: 5000 // Poll for new chats/updates
+        refetchInterval: 5000
     });
 
-    // Initialize/Find chat if targetUserId is present
+    // Initialize/Find chat
     useEffect(() => {
         const initChat = async () => {
             if (targetUserId && chats) {
-                // Check if chat already exists in list
-                const existing = chats.find((c: any) =>
-                    c.otherUser.id === targetUserId
-                );
+                const existing = chats.find((c: any) => c.otherUser.id === targetUserId);
 
                 if (existing) {
                     setActiveChat(existing);
                     setIsMobileListVisible(false);
                 } else {
                     try {
-                        // Create new chat
                         const response = await chatApi.initiate(targetUserId);
                         setActiveChat(response.data.data);
                         setIsMobileListVisible(false);
                         queryClient.invalidateQueries({ queryKey: ['chats'] });
                     } catch (error) {
                         console.error('Failed to initiate chat', error);
-                        navigate(user?.role === 'driver' ? '/driver' : '/passenger/my-bookings');
+                        navigate(isDriver ? '/driver' : '/passenger/my-bookings');
                     }
                 }
             }
         };
-
         initChat();
-    }, [targetUserId, chats, navigate, queryClient, user?.role]);
+    }, [targetUserId, chats, navigate, queryClient, isDriver]);
 
-    // Fetch messages for active chat
+    // Fetch messages
     const { data: messages, isLoading: messagesLoading } = useQuery({
         queryKey: ['messages', activeChat?.id],
         queryFn: async () => {
@@ -79,10 +79,9 @@ const Chat: React.FC<ChatProps> = ({ noLayout }) => {
             return response.data.data;
         },
         enabled: !!activeChat?.id,
-        refetchInterval: 3000 // Poll for new messages
+        refetchInterval: 3000
     });
 
-    // Send message mutation
     const sendMessageMutation = useMutation({
         mutationFn: (content: string) => chatApi.sendMessage(activeChat.id, content),
         onSuccess: () => {
@@ -90,13 +89,9 @@ const Chat: React.FC<ChatProps> = ({ noLayout }) => {
             queryClient.invalidateQueries({ queryKey: ['messages', activeChat.id] });
             queryClient.invalidateQueries({ queryKey: ['chats'] });
         },
-        onError: (error) => {
-            console.error('Message send error:', error);
-            toast.error('Impossible d\'envoyer le message. Veuillez réessayer.');
-        }
+        onError: () => toast.error('Impossible d\'envoyer le message.')
     });
 
-    // Scroll to bottom on new messages
     useEffect(() => {
         messagesEndRef.current?.scrollIntoView({ behavior: 'smooth' });
     }, [messages]);
@@ -111,130 +106,130 @@ const Chat: React.FC<ChatProps> = ({ noLayout }) => {
     const handleChatSelect = (chat: any) => {
         setActiveChat(chat);
         setIsMobileListVisible(false);
-        const basePath = user?.role === 'driver' ? '/driver/messages' : '/passenger/messages';
-        // Use replace: false to allow back navigation
+        const basePath = isDriver ? '/driver/messages' : '/passenger/messages';
         navigate(`${basePath}/${chat.otherUser.id}`);
     };
 
     return (
         <ChatLayout user={user} noLayout={noLayout}>
-            <div className={`h-[calc(100vh-100px)] max-w-6xl mx-auto p-4 flex gap-6 ${user?.role === 'driver' ? 'mt-4' : 'mt-8'}`}>
-                {/* Chat List Sidebar */}
-                <div className={`w-full md:w-96 bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-soft overflow-hidden flex flex-col ${isMobileListVisible ? 'block' : 'hidden md:flex'}`}>
-                    <div className="p-6 border-b border-slate-100 dark:border-slate-800">
-                        <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tight">Messages</h2>
+            <div className={`h-[calc(100vh-100px)] max-w-7xl mx-auto p-4 flex gap-6 mt-4 font-body animate-fade-in`}>
+
+                {/* Conversations List Panel */}
+                <div className={`w-full md:w-1/3 bg-white/5 backdrop-blur-xl rounded-[2rem] border border-white/10 overflow-hidden flex flex-col ${isMobileListVisible ? 'block' : 'hidden md:flex'}`}>
+                    <div className="p-6 border-b border-white/10 flex justify-between items-center">
+                        <h2 className={`text-2xl font-display tracking-wide text-white`}>MESSAGES</h2>
+                        <div className={`w-8 h-8 rounded-full ${isDriver ? 'bg-accent-teal/10 text-accent-teal' : 'bg-sand-300/10 text-sand-300'} flex items-center justify-center border border-white/10`}>
+                            <MoreVertical size={16} />
+                        </div>
                     </div>
 
                     <div className="flex-1 overflow-y-auto p-4 space-y-2">
                         {chatsLoading ? (
-                            <div className="text-center py-10 text-slate-400 text-xs uppercase tracking-widest">Chargement...</div>
+                            <div className="flex justify-center py-10"><div className={`w-8 h-8 rounded-full border-2 border-t-transparent animate-spin ${accentBorder}`}></div></div>
                         ) : chats?.length === 0 ? (
-                            <div className="text-center py-20 text-slate-400">
-                                <p className="text-xs font-black uppercase tracking-widest mb-2">Aucune conversation</p>
-                                <p className="text-[10px] opacity-70">Vos discussions apparaîtront ici</p>
+                            <div className="text-center py-20 text-white/40 font-mono">
+                                <p className="text-xs font-bold uppercase tracking-widest mb-2">No Conversations</p>
                             </div>
                         ) : (
-                            chats?.map((chat: any) => (
-                                <button
-                                    key={chat.id}
-                                    onClick={() => handleChatSelect(chat)}
-                                    className={`w-full p-4 rounded-2xl flex items-center gap-4 transition-all ${activeChat?.id === chat.id
-                                        ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 shadow-lg scale-105'
-                                        : 'hover:bg-slate-50 dark:hover:bg-slate-800'
-                                        }`}
-                                >
-                                    <div className="relative">
-                                        <img
-                                            src={chat.otherUser.avatarUrl || `https://ui-avatars.com/api/?name=${chat.otherUser.firstName}+${chat.otherUser.lastName}&background=random`}
-                                            alt={chat.otherUser.firstName}
-                                            className="w-12 h-12 rounded-xl object-cover"
-                                        />
-                                        {chat.unreadCount > 0 && activeChat?.id !== chat.id && (
-                                            <div className="absolute -top-1 -right-1 w-5 h-5 bg-red-500 rounded-full border-2 border-white dark:border-slate-900 flex items-center justify-center text-[10px] font-bold text-white">
-                                                {chat.unreadCount}
-                                            </div>
-                                        )}
-                                    </div>
-                                    <div className="flex-1 text-left overflow-hidden">
-                                        <div className="flex justify-between items-center mb-1">
-                                            <h3 className="font-bold text-sm truncate">{chat.otherUser.fullName}</h3>
-                                            {chat.lastMessage && (
-                                                <span className={`text-[9px] font-bold ${activeChat?.id === chat.id ? 'opacity-70' : 'text-slate-400'}`}>
-                                                    {format(new Date(chat.lastMessage.createdAt), 'HH:mm')}
-                                                </span>
+                            chats?.map((chat: any) => {
+                                const isActive = activeChat?.id === chat.id;
+                                return (
+                                    <button
+                                        key={chat.id}
+                                        onClick={() => handleChatSelect(chat)}
+                                        className={`w-full p-4 rounded-2xl flex items-center gap-4 transition-all group ${isActive
+                                            ? `${isDriver ? 'bg-accent-teal/20 border-l-4 border-accent-teal' : 'bg-sand-300/20 border-l-4 border-sand-300'}`
+                                            : 'hover:bg-white/5 border-l-4 border-transparent'
+                                            }`}
+                                    >
+                                        <div className="relative">
+                                            <img
+                                                src={chat.otherUser.avatarUrl || `https://ui-avatars.com/api/?name=${chat.otherUser.firstName}+${chat.otherUser.lastName}&background=random`}
+                                                alt={chat.otherUser.firstName}
+                                                className="w-12 h-12 rounded-xl object-cover ring-2 ring-white/10"
+                                            />
+                                            {chat.unreadCount > 0 && !isActive && (
+                                                <div className={`absolute -top-1 -right-1 w-5 h-5 ${accentBg} rounded-full border-2 border-night-900 flex items-center justify-center text-[10px] font-bold text-night-900`}>
+                                                    {chat.unreadCount}
+                                                </div>
                                             )}
                                         </div>
-                                        {chat.lastMessage ? (
-                                            <p className={`text-xs truncate ${activeChat?.id === chat.id ? 'opacity-80' : 'text-slate-500'}`}>
-                                                {chat.lastMessage.senderId === user?.id ? 'Vous: ' : ''}{chat.lastMessage.content}
+                                        <div className="flex-1 text-left overflow-hidden">
+                                            <div className="flex justify-between items-center mb-1">
+                                                <h3 className={`font-bold text-sm truncate ${isActive ? 'text-white' : 'text-white/80'}`}>{chat.otherUser.fullName}</h3>
+                                                <span className={`text-[10px] font-mono ${isActive ? accentText : 'text-white/40'}`}>
+                                                    {chat.lastMessage && format(new Date(chat.lastMessage.createdAt), 'HH:mm')}
+                                                </span>
+                                            </div>
+                                            <p className={`text-xs truncate font-medium ${isActive ? 'text-white/80' : 'text-white/40'}`}>
+                                                {chat.lastMessage ? (
+                                                    <>
+                                                        {chat.lastMessage.senderId === user?.id && <span className="opacity-70">You: </span>}
+                                                        {chat.lastMessage.content}
+                                                    </>
+                                                ) : <span className="italic opacity-50">New conversation</span>}
                                             </p>
-                                        ) : (
-                                            <p className="text-[10px] italic opacity-50">Nouvelle conversation</p>
-                                        )}
-                                    </div>
-                                </button>
-                            ))
+                                        </div>
+                                    </button>
+                                );
+                            })
                         )}
                     </div>
                 </div>
 
-                {/* Chat Window */}
-                <div className={`flex-1 bg-white dark:bg-slate-900 rounded-[2rem] border border-slate-100 dark:border-slate-800 shadow-soft overflow-hidden flex flex-col ${!isMobileListVisible ? 'block' : 'hidden md:flex'}`}>
+                {/* Chat Window Panel */}
+                <div className={`flex-1 bg-night-800/60 backdrop-blur-xl rounded-[2rem] border border-white/10 shadow-card overflow-hidden flex flex-col relative ${!isMobileListVisible ? 'block' : 'hidden md:flex'}`}>
                     {activeChat ? (
                         <>
-                            {/* Header */}
-                            <div className="p-4 border-b border-slate-100 dark:border-slate-800 flex items-center justify-between bg-white/50 dark:bg-slate-900/50 backdrop-blur-sm">
+                            {/* Chat Header */}
+                            <div className="p-4 border-b border-white/5 flex items-center justify-between bg-white/5 backdrop-blur-md absolute top-0 left-0 right-0 z-10 rounded-t-[2rem]">
                                 <div className="flex items-center gap-4">
                                     <button
                                         onClick={() => setIsMobileListVisible(true)}
-                                        className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 transition-colors"
+                                        className="md:hidden w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 text-white"
                                     >
-                                        <ArrowLeft className="w-5 h-5 text-slate-600 dark:text-slate-400" />
+                                        <ArrowLeft size={20} />
                                     </button>
                                     <div className="relative">
                                         <img
                                             src={activeChat.otherUser.avatarUrl || `https://ui-avatars.com/api/?name=${activeChat.otherUser.firstName}+${activeChat.otherUser.lastName}&background=random`}
                                             alt={activeChat.otherUser.firstName}
-                                            className="w-10 h-10 rounded-xl object-cover"
+                                            className="w-10 h-10 rounded-xl object-cover ring-1 ring-white/10"
                                         />
-                                        <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-white dark:border-slate-900"></div>
+                                        <div className="absolute bottom-0 right-0 w-3 h-3 bg-green-500 rounded-full border-2 border-night-900 shadow-[0_0_8px_#22c55e]"></div>
                                     </div>
                                     <div>
-                                        <h3 className="font-black text-slate-900 dark:text-white">{activeChat.otherUser.fullName}</h3>
-                                        <p className="text-[10px] font-bold text-green-500 uppercase tracking-widest">En ligne</p>
+                                        <h3 className="font-display text-lg text-white tracking-wide">{activeChat.otherUser.fullName}</h3>
+                                        <p className="text-[9px] font-bold text-green-400 uppercase tracking-widest font-mono">Online</p>
                                     </div>
                                 </div>
                                 <div className="flex items-center gap-2">
-                                    <button className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 transition-colors">
-                                        <Phone className="w-5 h-5" />
+                                    <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition-colors">
+                                        <Phone size={18} />
                                     </button>
-                                    <button className="w-10 h-10 flex items-center justify-center rounded-xl hover:bg-slate-100 dark:hover:bg-slate-800 text-slate-400 transition-colors">
-                                        <Info className="w-5 h-5" />
+                                    <button className="w-10 h-10 flex items-center justify-center rounded-xl bg-white/5 hover:bg-white/10 text-white/60 hover:text-white transition-colors">
+                                        <Info size={18} />
                                     </button>
                                 </div>
                             </div>
 
                             {/* Messages Area */}
-                            <div className="flex-1 overflow-y-auto p-6 space-y-4 bg-slate-50/50 dark:bg-black/20">
+                            <div className="flex-1 overflow-y-auto p-6 pt-24 space-y-6 bg-transparent">
                                 {messagesLoading ? (
-                                    <div className="flex justify-center py-10">
-                                        <div className="w-8 h-8 border-4 border-primary border-t-transparent rounded-full animate-spin"></div>
+                                    <div className="flex justify-center h-full items-center">
+                                        <div className={`w-10 h-10 rounded-full border-4 ${accentBorder} border-t-transparent animate-spin`}></div>
                                     </div>
                                 ) : (
                                     messages?.map((msg: any) => {
-                                        const isMe = msg.sender_id === user?.id; // Note: msg.sender_id matches DB, check API response format
-                                        // Wait, getMessages returns raw DB objects? Yes, Step 915 - getMessages selects *.
-                                        // I should double check the API response format.
-                                        // The ChatModel.getMessages returns raw 'messages' table rows.
+                                        const isMe = msg.sender_id === user?.id;
                                         return (
                                             <div key={msg.id} className={`flex ${isMe ? 'justify-end' : 'justify-start'}`}>
-                                                <div className={`max-w-[70%] p-4 rounded-2xl ${isMe
-                                                    ? 'bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-br-none shadow-lg'
-                                                    : 'bg-white dark:bg-slate-800 text-slate-700 dark:text-slate-200 rounded-bl-none shadow-sm border border-slate-100 dark:border-slate-700'
+                                                <div className={`max-w-[70%] p-4 rounded-2xl relative group ${isMe
+                                                    ? `${accentBg} text-night-900 rounded-br-none shadow-glow`
+                                                    : 'bg-white/10 text-white rounded-bl-none border border-white/5'
                                                     }`}>
-                                                    <p className="text-sm font-medium leading-relaxed">{msg.content}</p>
-                                                    <p className={`text-[9px] font-black uppercase tracking-widest mt-2 block text-right ${isMe ? 'opacity-50' : 'text-slate-400'
-                                                        }`}>
+                                                    <p className="text-sm font-medium leading-relaxed font-body">{msg.content}</p>
+                                                    <p className={`text-[9px] font-mono font-bold uppercase tracking-widest mt-2 block text-right ${isMe ? 'opacity-60' : 'opacity-40'}`}>
                                                         {format(new Date(msg.created_at), 'HH:mm')}
                                                     </p>
                                                 </div>
@@ -246,32 +241,32 @@ const Chat: React.FC<ChatProps> = ({ noLayout }) => {
                             </div>
 
                             {/* Input Area */}
-                            <form onSubmit={handleSendMessage} className="p-4 bg-white dark:bg-slate-900 border-t border-slate-100 dark:border-slate-800">
+                            <form onSubmit={handleSendMessage} className="p-4 bg-white/5 border-t border-white/5 backdrop-blur-xl">
                                 <div className="flex items-center gap-4">
                                     <input
                                         type="text"
                                         value={messageInput}
                                         onChange={(e) => setMessageInput(e.target.value)}
-                                        placeholder="Écrivez votre message..."
-                                        className="flex-1 bg-slate-50 dark:bg-slate-800/50 border-2 border-transparent focus:border-slate-900 dark:focus:border-white rounded-2xl px-6 py-4 outline-none transition-all font-medium text-slate-700 dark:text-white placeholder:text-slate-400"
+                                        placeholder="Type a message..."
+                                        className={`flex-1 bg-night-900 border border-white/10 focus:border-${isDriver ? 'accent-teal' : 'sand-300'} rounded-xl px-6 py-4 outline-none transition-all font-medium text-white placeholder:text-white/20`}
                                     />
                                     <button
                                         type="submit"
                                         disabled={!messageInput.trim() || sendMessageMutation.isPending}
-                                        className="bg-[#13ec6d] text-slate-900 w-14 h-14 rounded-2xl flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-all disabled:opacity-50 disabled:scale-100"
+                                        className={`w-14 h-14 rounded-xl flex items-center justify-center shadow-lg hover:scale-110 active:scale-95 transition-all disabled:opacity-50 disabled:scale-100 ${accentBg} text-night-900`}
                                     >
-                                        <Send className="w-6 h-6 -ml-1 mt-1" />
+                                        <Send size={20} className="-ml-1 mt-1" />
                                     </button>
                                 </div>
                             </form>
                         </>
                     ) : (
-                        <div className="flex-1 flex flex-col items-center justify-center text-slate-400 p-10 text-center">
-                            <div className="w-24 h-24 bg-slate-50 dark:bg-slate-800 rounded-3xl flex items-center justify-center mb-6 shadow-inner">
-                                <MoreVertical className="w-10 h-10 opacity-20" />
+                        <div className="flex-1 flex flex-col items-center justify-center text-white/20 p-10 text-center">
+                            <div className="w-24 h-24 bg-white/5 rounded-[2rem] flex items-center justify-center mb-6 border border-white/5 shadow-inner">
+                                <MoreVertical size={40} className="opacity-20" />
                             </div>
-                            <h3 className="text-xl font-black text-slate-900 dark:text-white">Vos Messages</h3>
-                            <p className="max-w-xs mt-2 text-sm">Sélectionnez une conversation pour commencer à discuter avec vos covoitureurs.</p>
+                            <h3 className="text-2xl font-display text-white mb-2 tracking-wide">YOUR MESSAGES</h3>
+                            <p className="max-w-xs mt-2 text-sm font-mono opacity-60">Select a conversation to start chatting.</p>
                         </div>
                     )}
                 </div>

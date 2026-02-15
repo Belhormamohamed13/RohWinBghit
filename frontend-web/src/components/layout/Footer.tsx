@@ -1,133 +1,61 @@
 import { Link } from 'react-router-dom';
 
 const Footer = () => {
-  const currentYear = new Date().getFullYear();
-
-  const footerLinks = {
-    company: [
-      { label: 'À propos', to: '/about' },
-      { label: 'Fonctionnement', to: '/how-it-works' },
-      { label: 'Recrutement', to: '/careers' },
-      { label: 'Presse', to: '/press' },
-    ],
-    support: [
-      { label: 'Centre d\'Aide', to: '/help' },
-      { label: 'Sécurité', to: '/safety' },
-      { label: 'Conditions', to: '/terms' },
-      { label: 'Confidentialité', to: '/privacy' },
-    ],
-    community: [
-      { label: 'Devenir Conducteur', to: '/register' },
-      { label: 'Règles d\'Élite', to: '/guidelines' },
-      { label: 'Impact CO2', to: '/eco-friendly' },
-    ],
-  };
-
-  const socialLinks = [
-    { icon: 'https://cdn-icons-png.flaticon.com/512/733/733547.png', label: 'Facebook' },
-    { icon: 'https://cdn-icons-png.flaticon.com/512/733/733579.png', label: 'Twitter' },
-    { icon: 'https://cdn-icons-png.flaticon.com/512/2111/2111463.png', label: 'Instagram' },
-    { icon: 'https://cdn-icons-png.flaticon.com/512/145/145807.png', label: 'LinkedIn' },
-  ];
-
   return (
-    <footer className="bg-slate-900 dark:bg-slate-950 text-white pt-24 pb-12 relative overflow-hidden border-t border-white/5">
-      <div className="absolute top-0 left-0 w-full h-[1px] bg-gradient-to-r from-transparent via-primary/50 to-transparent"></div>
-
-      <div className="container mx-auto px-6 lg:px-12 relative z-10">
-        <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-5 gap-16 lg:gap-12 mb-20">
-          {/* Brand Section */}
-          <div className="lg:col-span-2">
-            <Link to="/" className="flex items-center gap-3 mb-8 group">
-              <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20 group-hover:rotate-12 transition-all">
-                <span className="material-symbols-outlined text-slate-900 font-black text-2xl italic">drive_eta</span>
-              </div>
-              <div className="flex flex-col">
-                <span className="text-2xl font-black text-white tracking-widest leading-none">RohWin<span className="text-primary">Bghit</span></span>
-                <span className="text-[10px] font-black text-slate-500 uppercase tracking-widest mt-1">L'intelligence Collective</span>
-              </div>
-            </Link>
-            <p className="text-slate-400 text-base leading-relaxed mb-10 max-w-sm font-medium">
-              La première plateforme de mobilité partagée en Algérie.
-              Nous connectons les wilayas avec style, sécurité et économie.
-            </p>
+    <footer className="bg-[#0F172A] border-t border-white/5 pt-20 pb-10">
+      <div className="max-w-7xl mx-auto px-6">
+        <div className="grid grid-cols-2 md:grid-cols-4 gap-12 mb-20">
+          <div>
+            <h5 className="text-white font-display text-xl mb-6 tracking-wide">Plateforme</h5>
+            <ul className="space-y-4 text-sm text-slate-400">
+              <li><Link to="/trips/search" className="hover:text-primary transition-colors">Covoiturage</Link></li>
+              <li><Link to="/modal/bus" className="hover:text-primary transition-colors">Bus Inter-wilayas</Link></li>
+              <li><Link to="/modal/train" className="hover:text-primary transition-colors">Horaires Trains</Link></li>
+              <li><Link to="/destinations" className="hover:text-primary transition-colors">Villes desservies</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h5 className="text-white font-display text-xl mb-6 tracking-wide">À propos</h5>
+            <ul className="space-y-4 text-sm text-slate-400">
+              <li><Link to="/about" className="hover:text-primary transition-colors">Qui sommes-nous ?</Link></li>
+              <li><Link to="/commitments" className="hover:text-primary transition-colors">Nos engagements</Link></li>
+              <li><Link to="/press" className="hover:text-primary transition-colors">Presse</Link></li>
+              <li><Link to="/careers" className="hover:text-primary transition-colors">Carrières</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h5 className="text-white font-display text-xl mb-6 tracking-wide">Support</h5>
+            <ul className="space-y-4 text-sm text-slate-400">
+              <li><Link to="/help" className="hover:text-primary transition-colors">Centre d'aide</Link></li>
+              <li><Link to="/safety" className="hover:text-primary transition-colors">Règles de sécurité</Link></li>
+              <li><Link to="/terms" className="hover:text-primary transition-colors">Conditions générales</Link></li>
+              <li><Link to="/privacy" className="hover:text-primary transition-colors">Confidentialité</Link></li>
+            </ul>
+          </div>
+          <div>
+            <h5 className="text-white font-display text-xl mb-6 tracking-wide">Suivez-nous</h5>
             <div className="flex gap-4">
-              {socialLinks.map((social, i) => (
-                <a key={i} href="#" className="w-12 h-12 bg-white/5 hover:bg-primary rounded-xl flex items-center justify-center transition-all group shadow-inner border border-white/5">
-                  <img src={social.icon} alt={social.label} className="w-5 h-5 opacity-50 group-hover:opacity-100 group-hover:brightness-0 transition-all" />
-                </a>
-              ))}
-            </div>
-          </div>
-
-          {/* Navigation Columns */}
-          <div>
-            <h3 className="text-xs font-black text-white uppercase tracking-[0.3em] mb-8">Navigation</h3>
-            <ul className="space-y-4">
-              {footerLinks.company.map((link) => (
-                <li key={link.to}>
-                  <Link to={link.to} className="text-slate-400 hover:text-primary text-[11px] font-black uppercase tracking-widest transition-colors flex items-center gap-2 group">
-                    <span className="h-[2px] w-0 bg-primary group-hover:w-3 transition-all"></span>
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="text-xs font-black text-white uppercase tracking-[0.3em] mb-8">Communauté</h3>
-            <ul className="space-y-4">
-              {footerLinks.community.map((link) => (
-                <li key={link.to}>
-                  <Link to={link.to} className="text-slate-400 hover:text-primary text-[11px] font-black uppercase tracking-widest transition-colors flex items-center gap-2 group">
-                    <span className="h-[2px] w-0 bg-primary group-hover:w-3 transition-all"></span>
-                    {link.label}
-                  </Link>
-                </li>
-              ))}
-            </ul>
-          </div>
-
-          <div>
-            <h3 className="text-xs font-black text-white uppercase tracking-[0.3em] mb-8">Assistance</h3>
-            <div className="space-y-6">
-              <div className="flex items-center gap-4 group cursor-pointer">
-                <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center text-primary border border-white/5 group-hover:bg-primary group-hover:text-slate-900 transition-all">
-                  <span className="material-symbols-outlined text-lg">mail</span>
-                </div>
-                <div>
-                  <p className="text-[10px] text-slate-500 font-black tracking-widest leading-none">EMAIL</p>
-                  <p className="text-xs font-black text-white mt-1">info@rohwin.dz</p>
-                </div>
-              </div>
-              <div className="flex items-center gap-4 group cursor-pointer">
-                <div className="w-10 h-10 bg-white/5 rounded-xl flex items-center justify-center text-primary border border-white/5 group-hover:bg-primary group-hover:text-slate-900 transition-all">
-                  <span className="material-symbols-outlined text-lg">call</span>
-                </div>
-                <div>
-                  <p className="text-[10px] text-slate-500 font-black tracking-widest leading-none">SUPPORT 24/7</p>
-                  <p className="text-xs font-black text-white mt-1">+213 555 123 456</p>
-                </div>
-              </div>
+              <a href="#" className="h-10 w-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary hover:text-background-dark transition-all">
+                <span className="material-icons-round text-lg text-white group-hover:text-background-dark">facebook</span>
+              </a>
+              <a href="#" className="h-10 w-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary hover:text-background-dark transition-all">
+                <span className="material-icons-round text-lg text-white group-hover:text-background-dark">camera_alt</span>
+              </a>
+              <a href="#" className="h-10 w-10 rounded-full bg-white/5 flex items-center justify-center hover:bg-primary hover:text-background-dark transition-all">
+                <span className="material-icons-round text-lg text-white group-hover:text-background-dark">alternate_email</span>
+              </a>
             </div>
           </div>
         </div>
-
-        {/* Bottom Bar */}
-        <div className="pt-12 border-t border-white/5 flex flex-col md:flex-row justify-between items-center gap-8">
-          <div className="flex flex-col md:flex-row items-center gap-6">
-            <p className="text-[10px] font-black text-slate-500 uppercase tracking-widest">
-              © {currentYear} ROHWINBGHIT. MADE WITH ❤️ IN DZ.
-            </p>
-          </div>
-
-          <div className="flex items-center gap-8">
-            {footerLinks.support.slice(2).map(link => (
-              <Link key={link.to} to={link.to} className="text-[9px] font-black text-slate-500 hover:text-white uppercase tracking-[0.2em] transition-colors">{link.label}</Link>
-            ))}
-            <div className="h-4 w-[1px] bg-white/10 mx-2"></div>
-            <span className="text-[10px] font-black text-primary">v2.4.0 (PREMIUM)</span>
+        <div className="flex flex-col md:flex-row justify-between items-center pt-10 border-t border-white/5">
+          <p className="text-xs text-slate-500 mb-4 md:mb-0">© 2026 RohWinBghit Algerie. Tous droits réservés.</p>
+          <div className="flex items-center gap-6">
+            <button className="text-xs font-bold text-slate-500 hover:text-primary flex items-center gap-2 transition-colors">
+              <span className="material-icons-round text-sm">language</span> FRANÇAIS (DZ)
+            </button>
+            <button className="text-xs font-bold text-slate-500 hover:text-primary flex items-center gap-2 transition-colors">
+              <span className="material-icons-round text-sm">payments</span> DZD (DA)
+            </button>
           </div>
         </div>
       </div>

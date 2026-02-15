@@ -41,9 +41,13 @@ const PassengerSpace: React.FC = () => {
             spending: '/passenger/spending',
             messages: '/passenger/messages',
             profile: '/passenger/profile',
-            favorites: '/passenger/favorites'
+            favorites: '/passenger/favorites',
+            history: '/passenger/history'
         };
-        navigate(paths[tab] || '/passenger/search');
+        const path = paths[tab];
+        if (path) {
+            navigate(path);
+        }
     };
 
     return (

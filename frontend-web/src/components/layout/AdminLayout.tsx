@@ -1,7 +1,6 @@
 import React, { useState } from 'react';
 import { useNavigate, useLocation, Link } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
-import { motion, AnimatePresence } from 'framer-motion';
 
 interface AdminLayoutProps {
     children: React.ReactNode;
@@ -29,122 +28,128 @@ const AdminLayout: React.FC<AdminLayoutProps> = ({ children }) => {
     };
 
     return (
-        <div className="flex min-h-screen bg-[#08110b] selection:bg-primary/30 selection:text-slate-900 font-sans">
+        <div className="flex min-h-screen font-body text-text-primary">
             {/* Premium Admin Sidebar */}
-            <aside className="w-80 bg-slate-900/40 backdrop-blur-2xl border-r border-white/5 fixed h-full z-30 flex flex-col pt-10 pb-10 px-8">
-                <div className="flex items-center gap-4 mb-14 px-4 group cursor-pointer" onClick={() => navigate('/admin/dashboard')}>
-                    <div className="w-12 h-12 bg-primary rounded-[1.25rem] flex items-center justify-center shadow-lg shadow-primary/20 group-hover:rotate-12 transition-all">
-                        <span className="material-symbols-outlined text-slate-900 font-black text-2xl">shield_person</span>
-                    </div>
-                    <div className="flex flex-col">
-                        <span className="text-2xl font-black tracking-tighter text-white">RohWin<span className="text-primary italic">Admin</span></span>
-                        <span className="text-[10px] font-black text-primary/60 uppercase tracking-[0.4em] leading-none">CORE CONTROL</span>
-                    </div>
-                </div>
-
-                <nav className="flex-1 space-y-2">
-                    <p className="text-[10px] font-black text-slate-600 uppercase tracking-[0.3em] mb-6 ml-4">ADMINISTRATION</p>
-                    {menuItems.map((item) => {
-                        const isActive = activeItem === item.id;
-                        return (
-                            <Link
-                                key={item.id}
-                                to={item.path}
-                                className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-sm transition-all group ${isActive
-                                    ? 'bg-primary text-slate-900 shadow-xl shadow-primary/10'
-                                    : 'text-slate-500 hover:bg-white/5 hover:text-white'
-                                    }`}
-                            >
-                                <span className={`material-symbols-outlined font-bold ${isActive ? 'fill-1' : 'group-hover:scale-110 transition-transform'}`}>{item.icon}</span>
-                                <span>{item.label}</span>
-                                {isActive && <div className="ml-auto w-1.5 h-1.5 bg-slate-900 rounded-full animate-pulse"></div>}
-                            </Link>
-                        );
-                    })}
-                </nav>
-
-                <div className="mt-auto space-y-4">
-                    <div className="bg-gradient-to-br from-slate-800 to-slate-900 p-6 rounded-[2rem] border border-white/5 relative overflow-hidden group">
-                        <div className="absolute top-0 right-0 p-8 bg-primary/10 blur-2xl rounded-full translate-x-1/2 -translate-y-1/2"></div>
-                        <p className="text-[10px] font-black text-primary uppercase tracking-widest relative z-10">SYSTEM STATUS</p>
-                        <div className="flex items-center gap-2 mt-3 relative z-10">
-                            <span className="w-2 h-2 rounded-full bg-green-500 animate-pulse"></span>
-                            <p className="text-xs text-slate-300 font-bold">Node: Online</p>
+            <aside className="w-72 bg-night-900/90 backdrop-blur-xl border-r border-border fixed h-full z-30 flex flex-col hidden lg:flex">
+                <div className="p-8 h-full flex flex-col">
+                    {/* Logo */}
+                    <div className="flex items-center gap-3 mb-10 px-2 cursor-pointer group" onClick={() => navigate('/admin/dashboard')}>
+                        <div className="w-10 h-10 bg-gradient-to-br from-accent-blue to-night-600 rounded-lg flex items-center justify-center shadow-glow group-hover:rotate-12 transition-all">
+                            <span className="text-xl">🛡️</span>
+                        </div>
+                        <div className="flex flex-col">
+                            <span className="font-display text-2xl tracking-wide bg-gradient-to-r from-accent-blue to-sand-100 bg-clip-text text-transparent">ROHWIN</span>
+                            <span className="font-mono text-[10px] text-accent-blue uppercase tracking-[2px]">ADMIN</span>
                         </div>
                     </div>
 
-                    <button
-                        onClick={handleLogout}
-                        className="w-full flex items-center gap-4 px-6 py-4 text-red-500 hover:bg-red-500/5 rounded-2xl font-black text-[11px] uppercase tracking-widest transition-all group"
-                    >
-                        <span className="material-symbols-outlined font-black group-hover:translate-x-1 transition-transform">logout</span>
-                        <span>Quitter le Hub</span>
-                    </button>
+                    <nav className="flex-1 space-y-2">
+                        <p className="font-mono text-[10px] text-accent-blue uppercase tracking-widest mb-4 ml-4 opacity-70">// SYSTÈME</p>
+                        {menuItems.map((item) => {
+                            const isActive = activeItem === item.id;
+                            return (
+                                <Link
+                                    key={item.id}
+                                    to={item.path}
+                                    className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg text-sm font-bold transition-all group relative overflow-hidden ${isActive
+                                        ? 'bg-gradient-to-r from-accent-blue/10 to-transparent text-accent-blue border-l-2 border-accent-blue'
+                                        : 'text-text-muted hover:text-text-primary hover:bg-white/5'
+                                        }`}
+                                >
+                                    <span className={`material-symbols-outlined text-[20px] ${isActive ? 'text-accent-blue' : 'text-text-muted group-hover:text-accent-blue transition-colors'}`}>{item.icon}</span>
+                                    <span>{item.label}</span>
+                                    {isActive && <div className="absolute inset-0 bg-accent-blue/5 pointer-events-none"></div>}
+                                </Link>
+                            );
+                        })}
+                    </nav>
+
+                    <div className="mt-8 pt-8 border-t border-border">
+                        <div className="bg-night-800 p-4 rounded-xl border border-border/50 relative overflow-hidden group mb-4">
+                            <div className="flex items-center gap-3 relative z-10">
+                                <span className="w-2 h-2 rounded-full bg-accent-teal animate-pulse"></span>
+                                <p className="font-mono text-[10px] text-text-muted font-bold uppercase tracking-wider">Système Opérationnel</p>
+                            </div>
+                            <div className="absolute top-0 right-0 w-16 h-16 bg-accent-blue/10 blur-xl rounded-full"></div>
+                        </div>
+
+                        <button
+                            onClick={handleLogout}
+                            className="w-full flex items-center gap-4 px-4 py-3 text-accent-red hover:bg-accent-red/10 rounded-lg text-sm font-bold transition-all group"
+                        >
+                            <span className="material-symbols-outlined text-[20px] group-hover:translate-x-1 transition-transform">logout</span>
+                            <span>Déconnexion</span>
+                        </button>
+                    </div>
                 </div>
             </aside>
 
             {/* Main Content Area */}
-            <main className="flex-1 ml-80 min-h-screen relative">
+            <main className="flex-1 lg:ml-72 min-h-screen relative flex flex-col">
                 {/* Header Section */}
-                <header className="h-24 bg-[#08110b]/60 backdrop-blur-3xl border-b border-white/5 sticky top-0 z-20 px-12 flex items-center justify-between">
-                    <div className="flex flex-col">
-                        <h2 className="text-sm font-black text-white uppercase tracking-widest italic">Panel de <span className="text-primary italic">Contrôle</span></h2>
-                        <p className="text-[9px] text-slate-500 font-bold uppercase tracking-[0.2em] mt-1">{new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}</p>
+                <header className="h-20 bg-night-900/60 backdrop-blur-md border-b border-border sticky top-0 z-20 px-6 lg:px-10 flex items-center justify-between">
+                    <div>
+                        <h2 className="font-display text-xl text-text-primary tracking-wide hidden sm:block">PANNEAU DE CONTRÔLE</h2>
+                        <p className="font-mono text-[10px] text-text-dim uppercase tracking-widest hidden sm:block">
+                            {new Date().toLocaleDateString('fr-FR', { weekday: 'long', day: 'numeric', month: 'long' })}
+                        </p>
+
+                        {/* Mobile Logo */}
+                        <div className="lg:hidden flex items-center gap-2 sm:hidden">
+                            <span className="text-2xl">🛡️</span>
+                            <span className="font-display text-xl tracking-wide text-accent-blue">ADMIN</span>
+                        </div>
                     </div>
 
-                    <div className="flex items-center gap-8">
-                        <div className="flex items-center gap-3">
-                            <button className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 hover:text-primary hover:bg-white/10 transition-all group">
-                                <span className="material-symbols-outlined font-black group-hover:scale-110">notifications</span>
+                    <div className="flex items-center gap-6">
+                        <div className="flex items-center gap-2">
+                            <button className="p-2 text-text-muted hover:text-accent-blue hover:bg-white/5 rounded-lg transition-all relative">
+                                <span className="material-symbols-outlined">notifications</span>
+                                <span className="absolute top-2 right-2 w-2 h-2 bg-accent-red rounded-full border-2 border-night-900"></span>
                             </button>
-                            <button className="w-12 h-12 rounded-xl bg-white/5 flex items-center justify-center text-slate-400 hover:text-primary hover:bg-white/10 transition-all group">
-                                <span className="material-symbols-outlined font-black group-hover:scale-110">terminal</span>
+                            <button className="p-2 text-text-muted hover:text-accent-blue hover:bg-white/5 rounded-lg transition-all">
+                                <span className="material-symbols-outlined">terminal</span>
                             </button>
                         </div>
 
-                        <div className="h-10 w-[1px] bg-white/5 mx-2"></div>
+                        <div className="h-8 w-[1px] bg-border hidden md:block"></div>
 
-                        <div className="relative">
+                        <div className="relative group">
                             <button
                                 onClick={() => setIsProfileOpen(!isProfileOpen)}
-                                className="flex items-center gap-4 py-2 px-3 bg-white/5 border border-white/5 rounded-2xl hover:border-primary/30 transition-all group"
+                                className="flex items-center gap-3 hover:opacity-80 transition-opacity"
                             >
                                 <div className="text-right hidden sm:block">
-                                    <p className="text-xs font-black text-white italic tracking-tight">{user?.firstName} {user?.lastName}</p>
-                                    <p className="text-[9px] font-black text-primary uppercase tracking-widest leading-none mt-1">SUPER ADMIN</p>
+                                    <p className="text-sm font-bold text-text-primary leading-none">{user?.firstName}</p>
+                                    <p className="text-[10px] text-accent-blue uppercase tracking-widest mt-1 font-mono">Super Admin</p>
                                 </div>
-                                <img
-                                    src={user?.avatarUrl || `https://ui-avatars.com/api/?name=${user?.firstName}&background=2bee6c&color=08110b&bold=true`}
-                                    alt="Admin"
-                                    className="w-10 h-10 rounded-xl object-cover ring-2 ring-primary/20 shadow-lg group-hover:scale-105 transition-transform"
-                                />
+                                <div className="w-10 h-10 rounded-full p-0.5 bg-gradient-to-br from-accent-blue to-night-600 shadow-glow">
+                                    <img
+                                        src={user?.avatarUrl || `https://ui-avatars.com/api/?name=${user?.firstName}&background=4a9eff&color=0a0b0e&bold=true`}
+                                        alt="Admin"
+                                        className="w-full h-full rounded-full object-cover border-2 border-night-900"
+                                    />
+                                </div>
                             </button>
 
-                            <AnimatePresence>
-                                {isProfileOpen && (
-                                    <motion.div
-                                        initial={{ opacity: 0, y: 10, scale: 0.95 }}
-                                        animate={{ opacity: 1, y: 0, scale: 1 }}
-                                        exit={{ opacity: 0, y: 10, scale: 0.95 }}
-                                        className="absolute top-full right-0 mt-4 w-60 bg-slate-900 border border-white/10 rounded-[2rem] shadow-2xl p-4 z-50 overflow-hidden"
-                                    >
-                                        <div className="absolute top-0 right-0 p-12 bg-primary/10 blur-3xl rounded-full -translate-y-1/2 translate-x-1/2"></div>
-                                        <div className="relative z-10 space-y-2">
-                                            <button onClick={() => navigate('/admin/profile')} className="w-full flex items-center gap-3 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-slate-400 hover:text-white hover:bg-white/5 rounded-xl transition-all">
-                                                <span className="material-symbols-outlined text-lg">settings</span> Configuration
-                                            </button>
-                                            <button onClick={handleLogout} className="w-full flex items-center gap-3 px-4 py-3 text-[10px] font-black uppercase tracking-widest text-red-500 hover:bg-red-500/10 rounded-xl transition-all">
-                                                <span className="material-symbols-outlined text-lg">logout</span> Se déconnecter
-                                            </button>
-                                        </div>
-                                    </motion.div>
-                                )}
-                            </AnimatePresence>
+                            {isProfileOpen && (
+                                <div className="absolute top-full right-0 mt-3 w-56 bg-night-800 border border-border rounded-lg shadow-card p-2 animate-fade-up origin-top-right z-50">
+                                    <div className="px-3 py-2 border-b border-border/50 mb-2">
+                                        <p className="text-xs text-text-muted font-mono uppercase tracking-wider">Administration</p>
+                                    </div>
+                                    <button onClick={() => navigate('/admin/settings')} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-text-primary hover:bg-white/5 rounded-md transition-colors">
+                                        <span className="material-symbols-outlined text-[18px]">settings</span> Configuration
+                                    </button>
+                                    <button onClick={handleLogout} className="w-full flex items-center gap-3 px-3 py-2 text-sm text-accent-red hover:bg-white/5 rounded-md transition-colors mt-1">
+                                        <span className="material-symbols-outlined text-[18px]">logout</span> Déconnexion
+                                    </button>
+                                </div>
+                            )}
                         </div>
                     </div>
                 </header>
 
-                <div className="p-12 animate-in fade-in duration-500">
+                <div className="p-6 lg:p-10 flex-1 relative z-10">
                     {children}
                 </div>
             </main>

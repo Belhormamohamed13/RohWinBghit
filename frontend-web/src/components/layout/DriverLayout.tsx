@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useAuthStore } from '../../store/authStore';
 
@@ -11,12 +11,13 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ children, fullContent = fal
     const { user, logout } = useAuthStore();
     const location = useLocation();
     const navigate = useNavigate();
+    const [isMenuOpen, setIsMenuOpen] = useState(false);
 
     const menuItems = [
         { icon: 'grid_view', label: 'Tableau de bord', path: '/driver/dashboard' },
-        { icon: 'add_circle', label: 'Proposer un trajet', path: '/driver/publish' },
-        { icon: 'directions_car', label: 'Mon Véhicule', path: '/driver/vehicles' },
-        { icon: 'history', label: 'Mes Trajets', path: '/driver/my-trips' },
+        { icon: 'add_circle', label: 'Publier un trajet', path: '/driver/publish' },
+        { icon: 'directions_car', label: 'Mes véhicules', path: '/driver/vehicles' },
+        { icon: 'history', label: 'Mes trajets', path: '/driver/my-trips' },
         { icon: 'account_balance_wallet', label: 'Portefeuille', path: '/driver/wallet' },
         { icon: 'forum', label: 'Messages', path: '/driver/messages' },
         { icon: 'verified_user', label: 'Vérification', path: '/driver/verification' },
@@ -29,46 +30,50 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ children, fullContent = fal
     };
 
     return (
-        <div className="flex min-h-screen bg-background-light dark:bg-[#08110b] transition-colors duration-500 font-sans">
+        <div className="flex min-h-screen font-body text-text-primary relative">
+            <div className="page-bg" />
+
             {/* Premium Sidebar */}
-            <aside className="w-80 bg-white/70 dark:bg-background-dark/40 backdrop-blur-2xl border-r border-slate-200 dark:border-slate-800/50 fixed h-full z-40">
-                <div className="p-10 h-full flex flex-col">
-                    <div className="flex items-center gap-3 mb-12 group cursor-pointer" onClick={() => navigate('/driver/dashboard')}>
-                        <div className="w-12 h-12 bg-[#13ec6d] rounded-2xl flex items-center justify-center shadow-lg shadow-[#13ec6d]/30 group-hover:rotate-12 transition-all">
-                            <span className="material-symbols-outlined text-slate-900 font-black text-2xl">drive_eta</span>
+            <aside className="w-72 bg-night-800/80 backdrop-blur-xl border-r border-border fixed h-full z-30 transition-all duration-300 hidden lg:flex flex-col">
+                <div className="p-8 h-full flex flex-col">
+                    {/* Logo Area */}
+                    <div className="flex items-center gap-3 mb-10 cursor-pointer group" onClick={() => navigate('/driver/dashboard')}>
+                        <div className="w-10 h-10 bg-gradient-to-br from-accent-teal to-night-500 rounded-lg flex items-center justify-center shadow-glow group-hover:rotate-12 transition-all">
+                            <span className="text-xl">⚡</span>
                         </div>
                         <div className="flex flex-col">
-                            <span className="text-2xl font-black tracking-tighter text-slate-900 dark:text-white uppercase leading-none">Driver <span className="text-[#13ec6d] italic font-black">Pro</span></span>
-                            <span className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.3em] mt-1 leading-none">RohWinBghit</span>
+                            <span className="font-display text-2xl tracking-wide bg-gradient-to-r from-accent-teal to-sand-100 bg-clip-text text-transparent">ROHWIN</span>
+                            <span className="font-mono text-[10px] text-sand-300 uppercase tracking-[2px]">DRIVER</span>
                         </div>
                     </div>
 
-                    <nav className="space-y-2.5 flex-1">
-                        <p className="text-[10px] font-black text-slate-400 dark:text-slate-600 uppercase tracking-[0.2em] mb-4 ml-4">PILOT PANEL</p>
+                    <nav className="flex-1 space-y-2">
+                        <p className="font-mono text-[10px] text-accent-teal uppercase tracking-widest mb-4 ml-4 opacity-70">// ESPACE PILOTE</p>
                         {menuItems.map((item) => {
                             const isActive = location.pathname === item.path;
                             return (
                                 <Link
                                     key={item.path}
                                     to={item.path}
-                                    className={`w-full flex items-center gap-4 px-6 py-4 rounded-2xl font-bold text-sm transition-all group ${isActive
-                                        ? 'bg-[#13ec6d] text-slate-900 shadow-lg shadow-[#13ec6d]/20'
-                                        : 'text-slate-500 dark:text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800/60 hover:text-slate-900 dark:hover:text-white'
+                                    className={`w-full flex items-center gap-4 px-4 py-3 rounded-lg text-sm font-bold transition-all group relative overflow-hidden ${isActive
+                                        ? 'bg-gradient-to-r from-accent-teal/10 to-transparent text-accent-teal border-l-2 border-accent-teal'
+                                        : 'text-text-muted hover:text-text-primary hover:bg-white/5'
                                         }`}
                                 >
-                                    <span className={`material-symbols-outlined font-bold ${isActive ? 'fill-1' : 'group-hover:scale-110 transition-transform'}`}>{item.icon}</span>
+                                    <span className={`material-symbols-outlined text-[20px] ${isActive ? 'text-accent-teal' : 'text-text-muted group-hover:text-accent-teal transition-colors'}`}>{item.icon}</span>
                                     <span>{item.label}</span>
+                                    {isActive && <div className="absolute inset-0 bg-accent-teal/5 pointer-events-none"></div>}
                                 </Link>
                             );
                         })}
                     </nav>
 
-                    <div className="mt-8 pt-8 border-t border-slate-100 dark:border-slate-800/50">
+                    <div className="mt-8 pt-8 border-t border-border">
                         <button
                             onClick={handleLogout}
-                            className="w-full flex items-center gap-4 px-6 py-4 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-2xl font-bold text-sm transition-all group"
+                            className="w-full flex items-center gap-4 px-4 py-3 text-accent-red hover:bg-accent-red/10 rounded-lg text-sm font-bold transition-all group"
                         >
-                            <span className="material-symbols-outlined font-black group-hover:translate-x-1 transition-transform">logout</span>
+                            <span className="material-symbols-outlined text-[20px] group-hover:translate-x-1 transition-transform">logout</span>
                             <span>Déconnexion</span>
                         </button>
                     </div>
@@ -76,53 +81,82 @@ const DriverLayout: React.FC<DriverLayoutProps> = ({ children, fullContent = fal
             </aside>
 
             {/* Main Content Area */}
-            <main className="flex-1 ml-80 flex flex-col min-h-screen">
+            <main className="flex-1 lg:ml-72 transition-all duration-300 relative z-10 flex flex-col min-h-screen">
                 {/* Premium Header */}
-                <header className="h-24 bg-white/60 dark:bg-[#08110b]/60 backdrop-blur-2xl border-b border-slate-200 dark:border-slate-800/50 sticky top-0 z-30 px-12 flex items-center justify-between">
+                <header className="h-20 bg-night-900/60 backdrop-blur-md border-b border-border sticky top-0 z-20 px-6 lg:px-10 flex items-center justify-between">
                     <div>
-                        <h2 className="text-xl font-black text-slate-900 dark:text-white tracking-tight">Bonjour, {user?.firstName} 🎉</h2>
-                        <p className="text-[10px] font-black text-slate-400 uppercase tracking-widest mt-1">VOTRE TRAJET COMMENCE ICI</p>
+                        <h2 className="font-display text-2xl text-text-primary tracking-wide hidden sm:block">BONJOUR, <span className="text-sand-300">{user?.firstName}</span></h2>
+                        <p className="font-mono text-[10px] text-text-dim uppercase tracking-widest hidden sm:block">Prêt à conduire ?</p>
+
+                        {/* Mobile Logo */}
+                        <div className="lg:hidden flex items-center gap-2 sm:hidden">
+                            <span className="text-2xl">⚡</span>
+                            <span className="font-display text-xl tracking-wide text-accent-teal">DRIVER</span>
+                        </div>
                     </div>
 
                     <div className="flex items-center gap-6">
                         <button
                             onClick={() => navigate('/driver/publish')}
-                            className="hidden md:flex items-center gap-3 bg-[#13ec6d] text-slate-900 px-8 py-3.5 rounded-2xl font-black text-xs uppercase tracking-widest shadow-xl shadow-[#13ec6d]/20 hover:scale-[1.03] active:scale-95 transition-all"
+                            className="hidden md:flex btn btn-primary btn-sm rounded-full px-6 shadow-glow"
                         >
-                            <span className="material-symbols-outlined text-lg font-black">add_location</span>
+                            <span className="material-symbols-outlined text-lg">add_circle</span>
                             Publier un trajet
                         </button>
 
-                        <div className="flex items-center gap-2 border-l border-slate-200 dark:border-slate-800/50 pl-6 ml-2">
-                            <button className="relative p-3 text-slate-400 hover:bg-slate-100 dark:hover:bg-slate-800 rounded-2xl transition-all">
-                                <span className="material-symbols-outlined font-black">notifications</span>
-                                <span className="absolute top-3 right-3 w-2.5 h-2.5 bg-red-500 border-2 border-white dark:border-[#08110b] rounded-full"></span>
-                            </button>
+                        <div className="h-8 w-px bg-border hidden md:block"></div>
 
-                            <button
-                                onClick={handleLogout}
-                                className="relative p-3 text-red-500 hover:bg-red-50 dark:hover:bg-red-900/10 rounded-2xl transition-all group"
-                                title="Déconnexion"
-                            >
-                                <span className="material-symbols-outlined font-bold group-hover:scale-110">logout</span>
-                            </button>
-
-                            <div className="flex items-center gap-4 ml-4 group cursor-pointer" onClick={() => navigate('/driver/settings')}>
-                                <div className="text-right hidden sm:block">
-                                    <p className="text-sm font-black text-slate-900 dark:text-white leading-none tracking-tight">{user?.firstName} {user?.lastName?.charAt(0)}.</p>
-                                    <p className="text-[9px] font-black text-[#13ec6d] uppercase mt-1.5 tracking-widest">CONDUCTEUR PRO</p>
-                                </div>
+                        <div className="flex items-center gap-4 cursor-pointer hover:opacity-80 transition-opacity" onClick={() => navigate('/driver/settings')}>
+                            <div className="text-right hidden sm:block">
+                                <p className="text-sm font-bold text-text-primary leading-none">{user?.firstName}</p>
+                                <p className="text-[10px] text-accent-teal uppercase tracking-widest mt-1 font-mono">Conducteur Pro</p>
+                            </div>
+                            <div className="w-10 h-10 rounded-full p-0.5 bg-gradient-to-br from-accent-teal to-night-600 shadow-glow">
                                 <img
-                                    src={user?.avatarUrl || `https://ui-avatars.com/api/?name=${user?.firstName}&background=13ec6d&color=fff&bold=true`}
+                                    src={user?.avatarUrl || `https://ui-avatars.com/api/?name=${user?.firstName}&background=1adfb8&color=0a0b0e&bold=true`}
                                     alt="Profil"
-                                    className="w-12 h-12 rounded-[1.25rem] object-cover ring-4 ring-[#13ec6d]/10 group-hover:scale-105 transition-transform shadow-lg"
+                                    className="w-full h-full rounded-full object-cover border-2 border-night-900"
                                 />
                             </div>
                         </div>
+
+                        {/* Mobile Menu Toggle */}
+                        <button
+                            onClick={() => setIsMenuOpen(!isMenuOpen)}
+                            className="lg:hidden p-2 text-text-primary"
+                        >
+                            <span className="material-symbols-outlined">menu</span>
+                        </button>
                     </div>
                 </header>
 
-                <div className={`p-12 flex-1 ${fullContent ? '' : 'pt-12'}`}>
+                {/* Mobile Menu Overlay */}
+                {isMenuOpen && (
+                    <div className="lg:hidden fixed inset-0 z-50 bg-night-900/95 backdrop-blur-xl p-6 animate-fade-in">
+                        <div className="flex justify-between items-center mb-8">
+                            <span className="font-display text-2xl text-accent-teal">MENU</span>
+                            <button onClick={() => setIsMenuOpen(false)} className="p-2"><span className="material-symbols-outlined">close</span></button>
+                        </div>
+                        <nav className="flex flex-col gap-4">
+                            {menuItems.map((item) => (
+                                <Link
+                                    key={item.path}
+                                    to={item.path}
+                                    onClick={() => setIsMenuOpen(false)}
+                                    className="flex items-center gap-4 text-lg font-bold text-text-primary p-4 bg-night-800 rounded-xl"
+                                >
+                                    <span className="material-symbols-outlined text-accent-teal">{item.icon}</span>
+                                    {item.label}
+                                </Link>
+                            ))}
+                            <button onClick={handleLogout} className="flex items-center gap-4 text-lg font-bold text-accent-red p-4 mt-4">
+                                <span className="material-symbols-outlined">logout</span> Déconnexion
+                            </button>
+                        </nav>
+                    </div>
+                )}
+
+                <div className={`p-6 lg:p-10 flex-1 ${fullContent ? 'p-0' : ''}`}>
                     {children}
                 </div>
             </main>

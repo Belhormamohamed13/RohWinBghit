@@ -14,11 +14,11 @@ L.Icon.Default.mergeOptions({
     shadowUrl: 'https://cdnjs.cloudflare.com/ajax/libs/leaflet/1.7.1/images/marker-shadow.png',
 });
 
-// Custom markers for Start and End
+// Custom markers for Start and End - Updated to use Teal/Sand colors
 const startIcon = L.divIcon({
     html: `<div class="relative">
-            <div class="absolute inset-0 w-8 h-8 -translate-x-1/2 -translate-y-1/2 bg-[#13ec6d]/20 rounded-full animate-ping"></div>
-            <div class="w-6 h-6 -translate-x-1/2 -translate-y-1/2 bg-[#13ec6d] border-4 border-[#102218] rounded-full shadow-[0_0_15px_rgba(19,236,109,0.5)] flex items-center justify-center">
+            <div class="absolute inset-0 w-8 h-8 -translate-x-1/2 -translate-y-1/2 bg-[#1adfb8]/20 rounded-full animate-ping"></div>
+            <div class="w-6 h-6 -translate-x-1/2 -translate-y-1/2 bg-[#1adfb8] border-4 border-[#0a0b0e] rounded-full shadow-[0_0_15px_rgba(26,223,184,0.5)] flex items-center justify-center">
                 <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
             </div>
           </div>`,
@@ -28,7 +28,7 @@ const startIcon = L.divIcon({
 });
 
 const endIcon = L.divIcon({
-    html: `<div class="w-6 h-6 -translate-x-1/2 -translate-y-1/2 bg-blue-500 border-4 border-[#102218] rounded-full shadow-[0_0_15px_rgba(59,130,246,0.5)] flex items-center justify-center">
+    html: `<div class="w-6 h-6 -translate-x-1/2 -translate-y-1/2 bg-[#4a9eff] border-4 border-[#0a0b0e] rounded-full shadow-[0_0_15px_rgba(74,158,255,0.5)] flex items-center justify-center">
             <div class="w-1.5 h-1.5 bg-white rounded-full"></div>
           </div>`,
     className: 'custom-div-icon',
@@ -40,6 +40,7 @@ interface TripMapProps {
     fromWilayaId?: number;
     toWilayaId?: number;
     departureTime?: string;
+    darkMode?: boolean;
 }
 
 // Haversine formula to calculate distance between two points
@@ -74,7 +75,7 @@ const MapBoundsHandler = ({ points }: { points: [number, number][] }) => {
     return null;
 };
 
-const TripMap: React.FC<TripMapProps> = ({ fromWilayaId, toWilayaId, departureTime }) => {
+const TripMap: React.FC<TripMapProps> = ({ fromWilayaId, toWilayaId, departureTime, darkMode }) => {
     const fromCoords = fromWilayaId ? WILAYA_COORDS[fromWilayaId] : null;
     const toCoords = toWilayaId ? WILAYA_COORDS[toWilayaId] : null;
 
@@ -100,11 +101,11 @@ const TripMap: React.FC<TripMapProps> = ({ fromWilayaId, toWilayaId, departureTi
     const center: [number, number] = [36.7538, 3.0588]; // Algiers
 
     return (
-        <div className="h-full w-full relative">
+        <div className="h-full w-full relative font-body">
             <MapContainer
                 center={center}
                 zoom={6}
-                style={{ height: '100%', width: '100%', zIndex: 0 }}
+                style={{ height: '100%', width: '100%', zIndex: 0, background: '#0a0b0e' }}
                 zoomControl={false}
             >
                 <TileLayer
@@ -124,7 +125,7 @@ const TripMap: React.FC<TripMapProps> = ({ fromWilayaId, toWilayaId, departureTi
                     <Polyline
                         positions={[fromCoords, toCoords]}
                         pathOptions={{
-                            color: '#13ec6d',
+                            color: '#1adfb8',
                             weight: 4,
                             dashArray: '10, 10',
                             lineCap: 'round',
@@ -140,21 +141,21 @@ const TripMap: React.FC<TripMapProps> = ({ fromWilayaId, toWilayaId, departureTi
             {/* Floating Info Card */}
             {fromCoords && toCoords && (
                 <div className="absolute bottom-8 left-8 right-8 z-[400]">
-                    <div className="bg-[#102218]/80 backdrop-blur-xl p-6 rounded-[2rem] shadow-[0_20px_50px_rgba(0,0,0,0.5)] border border-[#13ec6d]/10">
+                    <div className="bg-night-900/80 backdrop-blur-xl p-6 rounded-[2rem] shadow-elevated border border-accent-teal/20">
                         <div className="flex items-center gap-6">
                             <div className="flex-1">
-                                <p className="text-[10px] uppercase font-bold tracking-[0.2em] text-[#13ec6d]/60 mb-1">Distance totale</p>
-                                <p className="text-xl font-extrabold text-white">{distance} km <span className="text-slate-500 font-medium text-sm ml-1">Est-Ouest</span></p>
+                                <p className="text-[9px] uppercase font-bold tracking-[0.2em] text-accent-teal/80 mb-1 font-mono">Distance totale</p>
+                                <p className="text-xl font-display text-text-primary tracking-wide">{distance} km <span className="text-text-muted font-bold text-xs ml-1 font-mono">Est-Ouest</span></p>
                             </div>
-                            <div className="w-px h-10 bg-[#13ec6d]/10"></div>
+                            <div className="w-px h-10 bg-accent-teal/20"></div>
                             <div className="flex-1 text-center">
-                                <p className="text-[10px] uppercase font-bold tracking-[0.2em] text-[#13ec6d]/60 mb-1">Arrivée prévue</p>
-                                <p className="text-xl font-extrabold text-white">{arrivalTime}</p>
+                                <p className="text-[9px] uppercase font-bold tracking-[0.2em] text-accent-teal/80 mb-1 font-mono">Arrivée prévue</p>
+                                <p className="text-xl font-display text-text-primary tracking-wide">{arrivalTime}</p>
                             </div>
-                            <div className="w-px h-10 bg-[#13ec6d]/10"></div>
+                            <div className="w-px h-10 bg-accent-teal/20"></div>
                             <div className="flex-1 text-right">
-                                <p className="text-[10px] uppercase font-bold tracking-[0.2em] text-[#13ec6d]/60 mb-1">Durée approx.</p>
-                                <p className="text-xl font-extrabold text-[#13ec6d]">{distance ? Math.floor(distance / 80) : 0}h {distance ? Math.round(((distance / 80) % 1) * 60) : 0}m</p>
+                                <p className="text-[9px] uppercase font-bold tracking-[0.2em] text-accent-teal/80 mb-1 font-mono">Durée approx.</p>
+                                <p className="text-xl font-display text-accent-teal tracking-wide">{distance ? Math.floor(distance / 80) : 0}h {distance ? Math.round(((distance / 80) % 1) * 60) : 0}m</p>
                             </div>
                         </div>
                     </div>
@@ -163,35 +164,35 @@ const TripMap: React.FC<TripMapProps> = ({ fromWilayaId, toWilayaId, departureTi
 
             {/* Live Indicator */}
             <div className="absolute top-8 left-8 z-[400]">
-                <div className="bg-[#102218]/80 backdrop-blur-md border border-[#13ec6d]/20 text-white px-5 py-2.5 rounded-2xl text-xs font-bold shadow-2xl flex items-center gap-2">
-                    <span className="w-2.5 h-2.5 bg-[#13ec6d] rounded-full animate-pulse shadow-[0_0_10px_#13ec6d]"></span>
-                    Live GPS Tracking
+                <div className="bg-night-900/80 backdrop-blur-md border border-accent-teal/30 text-text-primary px-5 py-2.5 rounded-xl text-xs font-bold shadow-glow flex items-center gap-3">
+                    <span className="w-2.5 h-2.5 bg-accent-teal rounded-full animate-pulse shadow-[0_0_10px_#1adfb8]"></span>
+                    LIVE GPS TRACKING
                 </div>
             </div>
 
             {/* Sidebar / Floating Controls */}
             <div className="absolute right-8 top-1/2 -translate-y-1/2 flex flex-col gap-3 z-[400]">
-                <button className="bg-[#102218]/80 backdrop-blur-xl p-3.5 rounded-2xl text-white hover:text-[#13ec6d] transition-all shadow-2xl border border-[#13ec6d]/10 group active:scale-90">
+                <button className="bg-night-900/80 backdrop-blur-xl p-3.5 rounded-xl text-text-primary hover:text-accent-teal transition-all shadow-card border border-border group active:scale-90">
                     <Locate size={20} className="group-hover:scale-110 transition-transform" />
                 </button>
-                <div className="flex flex-col bg-[#102218]/80 backdrop-blur-xl rounded-2xl shadow-2xl border border-[#13ec6d]/10 overflow-hidden">
+                <div className="flex flex-col bg-night-900/80 backdrop-blur-xl rounded-xl shadow-card border border-border overflow-hidden">
                     <button
-                        className="p-3.5 text-white hover:text-[#13ec6d] hover:bg-[#13ec6d]/10 transition-all border-b border-[#13ec6d]/10 group"
+                        className="p-3.5 text-text-primary hover:text-accent-teal hover:bg-accent-teal/10 transition-all border-b border-border group"
                     >
                         <Plus size={20} className="group-hover:scale-110 transition-transform" />
                     </button>
-                    <button className="p-3.5 text-white hover:text-[#13ec6d] hover:bg-[#13ec6d]/10 transition-all group">
+                    <button className="p-3.5 text-text-primary hover:text-accent-teal hover:bg-accent-teal/10 transition-all group">
                         <Minus size={20} className="group-hover:scale-110 transition-transform" />
                     </button>
                 </div>
-                <button className="bg-[#102218]/80 backdrop-blur-xl p-3.5 rounded-2xl text-white hover:text-[#13ec6d] transition-all shadow-2xl border border-[#13ec6d]/10 group active:scale-90">
+                <button className="bg-night-900/80 backdrop-blur-xl p-3.5 rounded-xl text-text-primary hover:text-accent-teal transition-all shadow-card border border-border group active:scale-90">
                     <Layers size={20} className="group-hover:scale-110 transition-transform" />
                 </button>
             </div>
 
             {/* Map Decorative Gradients */}
-            <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-[#102218]/60 to-transparent pointer-events-none z-[399]"></div>
-            <div className="absolute bottom-0 left-0 w-full h-48 bg-gradient-to-t from-[#102218]/80 to-transparent pointer-events-none z-[399]"></div>
+            <div className="absolute top-0 left-0 w-full h-32 bg-gradient-to-b from-night-900/80 to-transparent pointer-events-none z-[399]"></div>
+            <div className="absolute bottom-0 left-0 w-full h-48 bg-gradient-to-t from-night-900 via-night-900/50 to-transparent pointer-events-none z-[399]"></div>
         </div>
     );
 };

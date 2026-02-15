@@ -1,12 +1,9 @@
-import React, { useState } from 'react';
+import { useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
-import { useAuthStore } from '../../store/authStore';
-import { authApi } from '../../services/api';
-import { toast } from 'react-hot-toast';
+import api from '../../services/api';
 
-const Register: React.FC = () => {
+export default function Register() {
   const navigate = useNavigate();
-  const { isLoading } = useAuthStore();
   const [formData, setFormData] = useState({
     firstName: '',
     lastName: '',
@@ -14,200 +11,393 @@ const Register: React.FC = () => {
     phone: '',
     password: '',
     confirmPassword: '',
+    role: 'passenger',
+    carBrand: '',
+    carModel: '',
+    carYear: '',
+    carPlate: '',
   });
+  const [terms, setTerms] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [toast, setToast] = useState<{ msg: string; type: 'success' | 'error' } | null>(null);
+
+  const showToast = (msg: string, type: 'success' | 'error' = 'success') => {
+    setToast({ msg, type });
+    setTimeout(() => setToast(null), 3500);
+  };
+
+  const handleChange = (e: React.ChangeEvent<HTMLInputElement>) => {
+    setFormData({ ...formData, [e.target.name]: e.target.value });
+  };
+
+  const handleRoleChange = (role: string) => {
+    setFormData({ ...formData, role });
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+
+    if (!formData.firstName || !formData.lastName || !formData.email || !formData.phone || !formData.password || !formData.confirmPassword) {
+      showToast('Veuillez remplir tous les champs.', 'error');
+      return;
+    }
     if (formData.password !== formData.confirmPassword) {
-      toast.error('Les mots de passe ne correspondent pas');
+      showToast('Les mots de passe ne correspondent pas.', 'error');
+      return;
+    }
+    if (!terms) {
+      showToast('Veuillez accepter les conditions d\'utilisation.', 'error');
       return;
     }
 
+    setLoading(true);
+
     try {
-      await authApi.register({
-        firstName: formData.firstName,
-        lastName: formData.lastName,
+      const userData = {
+        first_name: formData.firstName,
+        last_name: formData.lastName,
         email: formData.email,
         phone: formData.phone,
         password: formData.password,
-        role: 'passenger', // Default role
-      });
-      toast.success('Compte créé avec succès !');
-      navigate('/login');
+        role: formData.role,
+        ...(formData.role === 'driver' && {
+          vehicle: {
+            brand: formData.carBrand,
+            model: formData.carModel,
+            year: parseInt(formData.carYear),
+            plate: formData.carPlate,
+          }
+        })
+      };
+
+      const response = await api.post('/auth/register', userData);
+
+      showToast('Compte créé avec succès !', 'success');
+
+      setTimeout(() => {
+        navigate('/login');
+      }, 1400);
     } catch (error: any) {
-      toast.error(error.response?.data?.message || 'Une erreur est survenue');
+      showToast(error.response?.data?.message || 'Une erreur est survenue. Réessayez.', 'error');
+    } finally {
+      setLoading(false);
     }
   };
 
   return (
-    <div className="min-h-screen bg-[#fcfdfc] dark:bg-[#08110b] flex items-center justify-center p-6 lg:p-12 relative overflow-hidden selection:bg-primary/30">
-      {/* Animated Background Elements */}
-      <div className="absolute inset-0 z-0 overflow-hidden">
-        <div className="absolute top-0 left-0 w-[600px] h-[600px] bg-primary/10 blur-[130px] rounded-full -translate-y-1/2 -translate-x-1/2"></div>
-        <div className="absolute bottom-0 right-0 w-[500px] h-[500px] bg-secondary/5 blur-[100px] rounded-full translate-y-1/2 translate-x-1/2"></div>
+    <div className="min-h-screen bg-night-900 flex items-center justify-center p-8 relative overflow-hidden">
+      {/* Background Effects */}
+      <div className="fixed inset-0 pointer-events-none z-0">
+        <div className="absolute inset-0 bg-[radial-gradient(ellipse_70%_60%_at_0%_0%,rgba(45,212,191,0.03),transparent_60%),radial-gradient(ellipse_60%_50%_at_100%_100%,rgba(212,168,83,0.04),transparent_60%)]" />
+        <div
+          className="absolute inset-0 opacity-[0.35]"
+          style={{
+            backgroundImage: `url("data:image/svg+xml,%3Csvg viewBox='0 0 256 256' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.04'/%3E%3C/svg%3E")`
+          }}
+        />
       </div>
 
-      <div className="w-full max-w-2xl relative z-10 transition-all animate-slide-up">
-        <div className="bg-white/80 dark:bg-slate-900/60 backdrop-blur-3xl p-10 lg:p-14 rounded-[3.5rem] border border-white dark:border-slate-800 shadow-elevated overflow-hidden">
+      <div className="w-full max-w-[640px] relative z-10 animate-[fadeUp_0.6s_ease_both]">
+        <div className="bg-[rgba(16,18,24,0.85)] backdrop-blur-[24px] p-12 rounded-[28px] border border-[rgba(255,255,255,0.07)] shadow-[0_24px_80px_rgba(0,0,0,0.6),0_0_0_1px_rgba(255,255,255,0.06)] relative overflow-hidden">
+          {/* Decorative glow */}
+          <div className="absolute top-[-80px] left-[-80px] w-[260px] h-[260px] bg-[radial-gradient(circle,rgba(45,212,191,0.04),transparent_70%)] rounded-full pointer-events-none" />
+
           {/* Header */}
-          <div className="text-center mb-10">
-            <Link to="/" className="inline-flex items-center gap-3 mb-8 group">
-              <div className="w-12 h-12 bg-primary rounded-2xl flex items-center justify-center shadow-lg shadow-primary/20 group-hover:rotate-12 transition-all">
-                <span className="material-symbols-outlined text-slate-900 font-black text-2xl italic">drive_eta</span>
+          <div className="text-center mb-10 relative z-10">
+            <Link to="/" className="inline-flex items-center gap-3 mb-8 no-underline">
+              <div className="w-12 h-12 bg-gradient-to-br from-sand-300 to-sand-500 rounded-[10px] flex items-center justify-center text-2xl shadow-[0_0_24px_rgba(212,168,83,0.3)] transition-transform duration-300 hover:rotate-3">
+                🚗
               </div>
-              <div className="text-left">
-                <h2 className="text-2xl font-black text-slate-900 dark:text-white tracking-tighter">RohWin<span className="text-primary italic">Bghit</span></h2>
-              </div>
+              <span className="font-['Bebas_Neue'] text-[30px] tracking-[4px] bg-gradient-to-r from-sand-100 to-sand-300 bg-clip-text text-transparent">
+                ROHWINBGHIT
+              </span>
             </Link>
-            <h1 className="text-4xl font-black text-slate-900 dark:text-white tracking-tighter mb-4 italic">Rejoignez <span className="text-primary">l'élite.</span></h1>
-            <p className="text-slate-500 dark:text-slate-400 font-medium text-sm">Créez votre profil et commencez l'expérience dès aujourd'hui.</p>
+            <h1 className="font-['Bebas_Neue'] text-[42px] tracking-[4px] text-[#f0e8d5] mb-2">INSCRIPTION</h1>
+            <p className="text-[#6b6455] text-sm">Rejoignez la plus grande communauté de covoiturage en Algérie.</p>
           </div>
 
-          {/* Form - Multicolumn for Desktop */}
-          <form onSubmit={handleSubmit} className="space-y-8">
-            <div className="grid grid-cols-1 md:grid-cols-2 gap-x-8 gap-y-6">
-              <div className="group relative">
-                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] ml-6 mb-2 block">PRÉNOM</label>
+          {/* Form */}
+          <form onSubmit={handleSubmit} className="relative z-10">
+            {/* Role Selector */}
+            <div className="mb-7">
+              <span className="font-['JetBrains_Mono'] text-[10px] font-bold text-[#6b6455] uppercase tracking-[2px] mb-3 block">Je suis un</span>
+              <div className="grid grid-cols-2 gap-3">
+                <label className={`role-card passenger cursor-pointer ${formData.role === 'passenger' ? 'selected' : ''}`}>
+                  <input
+                    type="radio"
+                    name="role"
+                    value="passenger"
+                    checked={formData.role === 'passenger'}
+                    onChange={() => handleRoleChange('passenger')}
+                    className="hidden"
+                  />
+                  <div className={`flex flex-col items-center justify-center gap-[10px] p-5 bg-night-700 border-[1.5px] border-[rgba(255,255,255,0.07)] rounded-4xl transition-all duration-300 text-center ${formData.role === 'passenger' ? 'border-sand-300 bg-[rgba(212,168,83,0.06)] shadow-[0_0_0_3px_rgba(212,168,83,0.08),inset_0_0_20px_rgba(212,168,83,0.04)]' : 'hover:border-[rgba(212,168,83,0.25)]'}`}>
+                    <div className="w-[52px] h-[52px] rounded-[14px] bg-[rgba(255,255,255,0.04)] flex items-center justify-center">
+                      <span className="material-symbols-outlined text-2xl text-[#3d3830]">person</span>
+                    </div>
+                    <span className="font-['Bebas_Neue'] text-lg tracking-[2px] text-[#f0e8d5]">Passager</span>
+                    <span className="text-[11px] text-[#6b6455] leading-relaxed">Je cherche un trajet</span>
+                    <span className={`inline-block font-['JetBrains_Mono'] text-[9px] font-bold uppercase tracking-[1px] px-2 py-1 rounded-md bg-[rgba(212,168,83,0.1)] text-sand-300 border border-[rgba(212,168,83,0.2)] ${formData.role === 'passenger' ? 'opacity-100 scale-100' : 'opacity-0 scale-80'} transition-all`}>Sélectionné</span>
+                  </div>
+                </label>
+                <label className={`role-card driver cursor-pointer ${formData.role === 'driver' ? 'selected' : ''}`}>
+                  <input
+                    type="radio"
+                    name="role"
+                    value="driver"
+                    checked={formData.role === 'driver'}
+                    onChange={() => handleRoleChange('driver')}
+                    className="hidden"
+                  />
+                  <div className={`flex flex-col items-center justify-center gap-[10px] p-5 bg-night-700 border-[1.5px] border-[rgba(255,255,255,0.07)] rounded-4xl transition-all duration-300 text-center ${formData.role === 'driver' ? 'border-teal bg-[rgba(45,212,191,0.06)] shadow-[0_0_0_3px_rgba(45,212,191,0.08),inset_0_0_20px_rgba(45,212,191,0.04)]' : 'hover:border-[rgba(45,212,191,0.25)]'}`}>
+                    <div className="w-[52px] h-[52px] rounded-[14px] bg-[rgba(255,255,255,0.04)] flex items-center justify-center">
+                      <span className="material-symbols-outlined text-2xl text-[#3d3830]">directions_car</span>
+                    </div>
+                    <span className="font-['Bebas_Neue'] text-lg tracking-[2px] text-[#f0e8d5]">Conducteur</span>
+                    <span className="text-[11px] text-[#6b6455] leading-relaxed">Je propose un trajet</span>
+                    <span className={`inline-block font-['JetBrains_Mono'] text-[9px] font-bold uppercase tracking-[1px] px-2 py-1 rounded-md bg-[rgba(45,212,191,0.1)] text-teal border border-[rgba(45,212,191,0.2)] ${formData.role === 'driver' ? 'opacity-100 scale-100' : 'opacity-0 scale-80'} transition-all`}>Sélectionné</span>
+                  </div>
+                </label>
+              </div>
+
+              {/* Driver extra fields */}
+              <div className={`overflow-hidden transition-all duration-500 ${formData.role === 'driver' ? 'max-h-[400px] opacity-100 mt-5' : 'max-h-0 opacity-0 mt-0'}`}>
+                <div className="p-5 bg-[rgba(45,212,191,0.03)] border border-[rgba(45,212,191,0.1)] rounded-4xl">
+                  <div className="font-['JetBrains_Mono'] text-[10px] font-bold text-teal uppercase tracking-[2px] mb-4 flex items-center gap-[6px]">
+                    <span className="material-symbols-outlined text-sm">directions_car</span>
+                    Informations du véhicule
+                  </div>
+                  <div className="grid grid-cols-2 gap-3">
+                    <div>
+                      <label className="font-['JetBrains_Mono'] text-[10px] font-bold text-[#6b6455] uppercase tracking-[2px] mb-2 block">Marque</label>
+                      <div className="relative">
+                        <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[#3d3830] text-xl">car_tag</span>
+                        <input
+                          type="text"
+                          name="carBrand"
+                          value={formData.carBrand}
+                          onChange={handleChange}
+                          placeholder="Ex: Renault"
+                          className="w-full px-4 py-3.5 pl-11 bg-night-900 border border-[rgba(255,255,255,0.07)] rounded-xl text-[#f0e8d5] font-['DM_Sans'] text-sm font-bold outline-none focus:border-teal focus:shadow-[0_0_0_3px_rgba(45,212,191,0.08)]"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="font-['JetBrains_Mono'] text-[10px] font-bold text-[#6b6455] uppercase tracking-[2px] mb-2 block">Modèle</label>
+                      <div className="relative">
+                        <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[#3d3830] text-xl">directions_car</span>
+                        <input
+                          type="text"
+                          name="carModel"
+                          value={formData.carModel}
+                          onChange={handleChange}
+                          placeholder="Ex: Clio"
+                          className="w-full px-4 py-3.5 pl-11 bg-night-900 border border-[rgba(255,255,255,0.07)] rounded-xl text-[#f0e8d5] font-['DM_Sans'] text-sm font-bold outline-none focus:border-teal focus:shadow-[0_0_0_3px_rgba(45,212,191,0.08)]"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="font-['JetBrains_Mono'] text-[10px] font-bold text-[#6b6455] uppercase tracking-[2px] mb-2 block">Année</label>
+                      <div className="relative">
+                        <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[#3d3830] text-xl">calendar_month</span>
+                        <input
+                          type="text"
+                          name="carYear"
+                          value={formData.carYear}
+                          onChange={handleChange}
+                          placeholder="Ex: 2019"
+                          maxLength={4}
+                          className="w-full px-4 py-3.5 pl-11 bg-night-900 border border-[rgba(255,255,255,0.07)] rounded-xl text-[#f0e8d5] font-['DM_Sans'] text-sm font-bold outline-none focus:border-teal focus:shadow-[0_0_0_3px_rgba(45,212,191,0.08)]"
+                        />
+                      </div>
+                    </div>
+                    <div>
+                      <label className="font-['JetBrains_Mono'] text-[10px] font-bold text-[#6b6455] uppercase tracking-[2px] mb-2 block">Immatriculation</label>
+                      <div className="relative">
+                        <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[#3d3830] text-xl">pin</span>
+                        <input
+                          type="text"
+                          name="carPlate"
+                          value={formData.carPlate}
+                          onChange={handleChange}
+                          placeholder="Ex: 123-456-16"
+                          className="w-full px-4 py-3.5 pl-11 bg-night-900 border border-[rgba(255,255,255,0.07)] rounded-xl text-[#f0e8d5] font-['DM_Sans'] text-sm font-bold outline-none focus:border-teal focus:shadow-[0_0_0_3px_rgba(45,212,191,0.08)]"
+                        />
+                      </div>
+                    </div>
+                  </div>
+                </div>
+              </div>
+            </div>
+
+            {/* Form Grid */}
+            <div className="grid grid-cols-2 gap-5">
+              {/* Prénom */}
+              <div>
+                <label className="font-['JetBrains_Mono'] text-[10px] font-bold text-[#6b6455] uppercase tracking-[2px] mb-2 block">Prénom</label>
                 <div className="relative">
-                  <span className="material-symbols-outlined absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors text-lg">person</span>
+                  <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[#3d3830] text-xl">person</span>
                   <input
                     type="text"
+                    name="firstName"
                     value={formData.firstName}
-                    onChange={(e) => setFormData({ ...formData, firstName: e.target.value })}
-                    className="w-full pl-14 pr-6 py-4 bg-slate-100/50 dark:bg-slate-800/40 border-2 border-transparent rounded-[1.5rem] focus:border-primary/30 focus:bg-white dark:focus:bg-slate-800 outline-none transition-all font-bold text-sm"
-                    placeholder="Ahmed"
+                    onChange={handleChange}
+                    placeholder="Votre prénom"
                     required
+                    autoComplete="given-name"
+                    className="w-full px-4 py-3.5 pl-11 bg-night-700 border border-[rgba(255,255,255,0.07)] rounded-xl text-[#f0e8d5] font-['DM_Sans'] text-sm font-bold outline-none focus:border-sand-300 focus:shadow-[0_0_0_3px_rgba(212,168,83,0.08)]"
                   />
                 </div>
               </div>
 
-              <div className="group relative">
-                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] ml-6 mb-2 block">NOM</label>
+              {/* Nom */}
+              <div>
+                <label className="font-['JetBrains_Mono'] text-[10px] font-bold text-[#6b6455] uppercase tracking-[2px] mb-2 block">Nom</label>
                 <div className="relative">
-                  <span className="material-symbols-outlined absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors text-lg">badge</span>
+                  <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[#3d3830] text-xl">badge</span>
                   <input
                     type="text"
+                    name="lastName"
                     value={formData.lastName}
-                    onChange={(e) => setFormData({ ...formData, lastName: e.target.value })}
-                    className="w-full pl-14 pr-6 py-4 bg-slate-100/50 dark:bg-slate-800/40 border-2 border-transparent rounded-[1.5rem] focus:border-primary/30 focus:bg-white dark:focus:bg-slate-800 outline-none transition-all font-bold text-sm"
-                    placeholder="Rahmani"
+                    onChange={handleChange}
+                    placeholder="Votre nom"
                     required
+                    autoComplete="family-name"
+                    className="w-full px-4 py-3.5 pl-11 bg-night-700 border border-[rgba(255,255,255,0.07)] rounded-xl text-[#f0e8d5] font-['DM_Sans'] text-sm font-bold outline-none focus:border-sand-300 focus:shadow-[0_0_0_3px_rgba(212,168,83,0.08)]"
                   />
                 </div>
               </div>
 
-              <div className="group relative md:col-span-2">
-                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] ml-6 mb-2 block">ADRESSE EMAIL</label>
+              {/* Email */}
+              <div className="col-span-2">
+                <label className="font-['JetBrains_Mono'] text-[10px] font-bold text-[#6b6455] uppercase tracking-[2px] mb-2 block">Adresse Email</label>
                 <div className="relative">
-                  <span className="material-symbols-outlined absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors text-lg">mail</span>
+                  <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[#3d3830] text-xl">mail</span>
                   <input
                     type="email"
+                    name="email"
                     value={formData.email}
-                    onChange={(e) => setFormData({ ...formData, email: e.target.value })}
-                    className="w-full pl-14 pr-6 py-4 bg-slate-100/50 dark:bg-slate-800/40 border-2 border-transparent rounded-[1.5rem] focus:border-primary/30 focus:bg-white dark:focus:bg-slate-800 outline-none transition-all font-bold text-sm"
-                    placeholder="ahmed@example.dz"
+                    onChange={handleChange}
+                    placeholder="nom@exemple.com"
                     required
+                    autoComplete="email"
+                    className="w-full px-4 py-3.5 pl-11 bg-night-700 border border-[rgba(255,255,255,0.07)] rounded-xl text-[#f0e8d5] font-['DM_Sans'] text-sm font-bold outline-none focus:border-sand-300 focus:shadow-[0_0_0_3px_rgba(212,168,83,0.08)]"
                   />
                 </div>
               </div>
 
-              <div className="group relative">
-                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] ml-6 mb-2 block">TÉLÉPHONE</label>
+              {/* Téléphone */}
+              <div className="col-span-2">
+                <label className="font-['JetBrains_Mono'] text-[10px] font-bold text-[#6b6455] uppercase tracking-[2px] mb-2 block">Téléphone</label>
                 <div className="relative">
-                  <span className="material-symbols-outlined absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors text-lg">call</span>
+                  <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[#3d3830] text-xl">call</span>
                   <input
                     type="tel"
+                    name="phone"
                     value={formData.phone}
-                    onChange={(e) => setFormData({ ...formData, phone: e.target.value })}
-                    className="w-full pl-14 pr-6 py-4 bg-slate-100/50 dark:bg-slate-800/40 border-2 border-transparent rounded-[1.5rem] focus:border-primary/30 focus:bg-white dark:focus:bg-slate-800 outline-none transition-all font-bold text-sm"
-                    placeholder="+213 5XX XX XX XX"
+                    onChange={handleChange}
+                    placeholder="0550 12 34 56"
                     required
+                    autoComplete="tel"
+                    className="w-full px-4 py-3.5 pl-11 bg-night-700 border border-[rgba(255,255,255,0.07)] rounded-xl text-[#f0e8d5] font-['DM_Sans'] text-sm font-bold outline-none focus:border-sand-300 focus:shadow-[0_0_0_3px_rgba(212,168,83,0.08)]"
                   />
                 </div>
               </div>
 
-              <div className="group relative">
-                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] ml-6 mb-2 block">TYPE DE COMPTE</label>
+              {/* Mot de passe */}
+              <div>
+                <label className="font-['JetBrains_Mono'] text-[10px] font-bold text-[#6b6455] uppercase tracking-[2px] mb-2 block">Mot de Passe</label>
                 <div className="relative">
-                  <span className="material-symbols-outlined absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors text-lg">account_circle</span>
-                  <select className="w-full pl-14 pr-10 py-4 bg-slate-100/50 dark:bg-slate-800/40 border-2 border-transparent rounded-[1.5rem] focus:border-primary/30 focus:bg-white dark:focus:bg-slate-800 outline-none transition-all font-black text-[10px] uppercase tracking-widest appearance-none cursor-pointer">
-                    <option value="passenger">Passager uniquement</option>
-                    <option value="driver">Conducteur & Passager</option>
-                  </select>
-                  <span className="material-symbols-outlined absolute right-6 top-1/2 -translate-y-1/2 text-slate-400 pointer-events-none">expand_more</span>
-                </div>
-              </div>
-
-              <div className="group relative">
-                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] ml-6 mb-2 block">MOT DE PASSE</label>
-                <div className="relative">
-                  <span className="material-symbols-outlined absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors text-lg">lock_open</span>
+                  <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[#3d3830] text-xl">lock</span>
                   <input
                     type="password"
+                    name="password"
                     value={formData.password}
-                    onChange={(e) => setFormData({ ...formData, password: e.target.value })}
-                    className="w-full pl-14 pr-6 py-4 bg-slate-100/50 dark:bg-slate-800/40 border-2 border-transparent rounded-[1.5rem] focus:border-primary/30 focus:bg-white dark:focus:bg-slate-800 outline-none transition-all font-bold text-sm"
+                    onChange={handleChange}
                     placeholder="••••••••"
                     required
+                    autoComplete="new-password"
+                    className="w-full px-4 py-3.5 pl-11 bg-night-700 border border-[rgba(255,255,255,0.07)] rounded-xl text-[#f0e8d5] font-['DM_Sans'] text-sm font-bold outline-none focus:border-sand-300 focus:shadow-[0_0_0_3px_rgba(212,168,83,0.08)]"
                   />
+                </div>
+                {/* Password strength */}
+                <div className="flex gap-1 mt-2">
+                  <div className="flex-1 h-[3px] rounded-[2px] bg-night-700 transition-colors" id="seg1" />
+                  <div className="flex-1 h-[3px] rounded-[2px] bg-night-700 transition-colors" id="seg2" />
+                  <div className="flex-1 h-[3px] rounded-[2px] bg-night-700 transition-colors" id="seg3" />
                 </div>
               </div>
 
-              <div className="group relative">
-                <label className="text-[10px] font-black text-slate-400 dark:text-slate-500 uppercase tracking-[0.2em] ml-6 mb-2 block">CONFIRMATION</label>
+              {/* Confirmation */}
+              <div>
+                <label className="font-['JetBrains_Mono'] text-[10px] font-bold text-[#6b6455] uppercase tracking-[2px] mb-2 block">Confirmation</label>
                 <div className="relative">
-                  <span className="material-symbols-outlined absolute left-6 top-1/2 -translate-y-1/2 text-slate-400 group-focus-within:text-primary transition-colors text-lg">check_circle</span>
+                  <span className="material-symbols-outlined absolute left-3.5 top-1/2 -translate-y-1/2 text-[#3d3830] text-xl">check_circle</span>
                   <input
                     type="password"
+                    name="confirmPassword"
                     value={formData.confirmPassword}
-                    onChange={(e) => setFormData({ ...formData, confirmPassword: e.target.value })}
-                    className="w-full pl-14 pr-6 py-4 bg-slate-100/50 dark:bg-slate-800/40 border-2 border-transparent rounded-[1.5rem] focus:border-primary/30 focus:bg-white dark:focus:bg-slate-800 outline-none transition-all font-bold text-sm"
+                    onChange={handleChange}
                     placeholder="••••••••"
                     required
+                    autoComplete="new-password"
+                    className="w-full px-4 py-3.5 pl-11 bg-night-700 border border-[rgba(255,255,255,0.07)] rounded-xl text-[#f0e8d5] font-['DM_Sans'] text-sm font-bold outline-none focus:border-sand-300 focus:shadow-[0_0_0_3px_rgba(212,168,83,0.08)]"
                   />
                 </div>
               </div>
             </div>
 
-            <div className="flex items-start gap-4 px-6 mt-4">
-              <input type="checkbox" id="terms" required className="mt-1 w-5 h-5 rounded-lg border-2 border-slate-200 dark:border-slate-700 text-primary focus:ring-primary transition-all cursor-pointer" />
-              <label htmlFor="terms" className="text-[10px] font-bold text-slate-500 dark:text-slate-400 leading-relaxed uppercase tracking-wider">
-                J'accepte les <span className="text-primary font-black underline cursor-pointer">conditions d'utilisation</span> et la <span className="text-primary font-black underline cursor-pointer">politique de confidentialité</span> de RohWinBghit.
+            {/* Terms */}
+            <div className="flex items-start gap-3 mt-5">
+              <input
+                type="checkbox"
+                id="terms"
+                checked={terms}
+                onChange={(e) => setTerms(e.target.checked)}
+                className="w-[18px] h-[18px] min-w-[18px] p-0 bg-night-900 border-[1.5px] border-[rgba(255,255,255,0.07)] rounded-md cursor-pointer accent-sand-300 mt-0.5"
+              />
+              <label htmlFor="terms" className="font-['DM_Sans'] text-xs text-[#6b6455] leading-relaxed cursor-pointer">
+                J'accepte les <a href="#" className="text-sand-300 no-underline hover:underline">conditions d'utilisation</a> et la <a href="#" className="text-sand-300 no-underline hover:underline">politique de confidentialité</a>.
               </label>
             </div>
 
             <button
               type="submit"
-              disabled={isLoading}
-              className="w-full py-6 bg-slate-900 dark:bg-white text-white dark:text-slate-900 rounded-[1.75rem] font-black text-xs uppercase tracking-[0.3em] overflow-hidden shadow-2xl hover:bg-primary hover:text-slate-900 transition-all active:scale-95 disabled:opacity-50"
+              disabled={loading}
+              className="w-full py-4 bg-sand-300 text-night-900 border-none rounded-xl font-['JetBrains_Mono'] text-[13px] font-bold tracking-[2.5px] uppercase cursor-pointer shadow-[0_0_30px_rgba(212,168,83,0.25),0_4px_16px_rgba(0,0,0,0.4)] transition-all duration-200 hover:bg-sand-400 hover:scale-[1.02] hover:shadow-[0_0_40px_rgba(212,168,83,0.35),0_6px_20px_rgba(0,0,0,0.5)] active:scale-[0.98] disabled:opacity-60 disabled:cursor-not-allowed disabled:transform-none flex items-center justify-center gap-2 mt-2"
             >
-              {isLoading ? (
-                <div className="flex items-center justify-center gap-3">
-                  <div className="w-5 h-5 border-2 border-current border-t-transparent rounded-full animate-spin"></div>
-                  Invasion en cours...
-                </div>
+              {loading ? (
+                <>
+                  <span className="w-4 h-4 border-2 border-night-900 border-t-transparent rounded-full animate-spin" />
+                  CRÉATION...
+                </>
               ) : (
-                <span className="flex items-center justify-center gap-3">
-                  Forger mon profil
-                  <span className="material-symbols-outlined font-black">person_add</span>
-                </span>
+                'CRÉER MON COMPTE'
               )}
             </button>
           </form>
 
           {/* Footer */}
-          <div className="mt-10 text-center">
-            <p className="text-slate-500 dark:text-slate-400 font-medium text-sm">
-              Déjà parmi nous ?{' '}
-              <Link to="/login" className="text-primary font-black uppercase tracking-widest hover:underline italic ml-1">
-                S'identifier
-              </Link>
+          <div className="mt-8 pt-6 border-t border-[rgba(255,255,255,0.06)] text-center">
+            <p className="text-[#6b6455] text-sm">
+              Déjà un compte ?<Link to="/login" className="text-sand-300 font-bold no-underline ml-1 hover:text-sand-200 transition-colors">Se connecter</Link>
             </p>
           </div>
         </div>
+
+        {/* Page Footer */}
+        <div className="mt-7 text-center">
+          <p className="font-['JetBrains_Mono'] text-[10px] text-[#3d3830] uppercase tracking-[2.5px]">© 2026 ROHWINBGHIT — START YOUR JOURNEY</p>
+        </div>
       </div>
+
+      {/* Toast */}
+      {toast && (
+        <div className={`fixed bottom-8 right-8 p-3.5 rounded-xl text-[13px] font-semibold flex items-center gap-2.5 shadow-[0_8px_32px_rgba(0,0,0,0.4)] transition-all duration-300 z-50 max-w-[360px] ${toast.type === 'success' ? 'bg-[#1a2e1a] border border-[rgba(74,222,128,0.2)] text-green-400' : 'bg-[#2e1a1a] border border-[rgba(248,113,113,0.2)] text-red-400'} ${toast ? 'opacity-100 translate-y-0' : 'opacity-0 translate-y-4 pointer-events-none'}`}>
+          <span className="material-symbols-outlined text-lg">{toast.type === 'success' ? 'check_circle' : 'error'}</span>
+          {toast.msg}
+        </div>
+      )}
     </div>
   );
-};
-
-export default Register;
+}

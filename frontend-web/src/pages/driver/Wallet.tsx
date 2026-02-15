@@ -37,151 +37,164 @@ const DriverWallet: React.FC = () => {
 
     return (
         <DriverLayout>
-            <header className="flex flex-wrap justify-between items-center gap-4 mb-10">
-                <div className="flex flex-col gap-1">
-                    <h2 className="text-[#0d1b12] dark:text-white text-3xl font-black tracking-tight">Portefeuille Chauffeur</h2>
-                    <p className="text-[#4c9a66] text-sm font-medium">Consultez vos revenus et effectuez vos demandes de retrait.</p>
-                </div>
-                <div className="flex gap-3">
-                    <button className="flex items-center gap-2 px-6 py-4 bg-white dark:bg-slate-900 border border-slate-200 dark:border-slate-800 rounded-2xl text-xs font-black uppercase tracking-widest hover:shadow-xl transition-all active:scale-95">
-                        <Download size={18} />
-                        Relevé Mensuel
-                    </button>
-                    <button className="flex items-center gap-2 px-6 py-4 bg-[#13ec6d] text-white rounded-2xl text-xs font-black uppercase tracking-widest hover:bg-[#10cc00] transition-all shadow-xl shadow-[#13ec6d]/20 active:scale-95">
-                        <Landmark size={18} />
-                        Retirer mes gains
-                    </button>
-                </div>
-            </header>
-
-            {/* Stats Cards */}
-            <div className="grid grid-cols-1 md:grid-cols-3 gap-8 mb-12">
-                <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[2.5rem] p-8 shadow-sm relative overflow-hidden group">
-                    <div className="absolute top-0 right-0 w-40 h-40 bg-[#13ec6d]/5 rounded-full -mr-20 -mt-20 group-hover:scale-110 transition-transform"></div>
-                    <div className="flex justify-between items-start mb-8 relative z-10">
-                        <div className="p-4 bg-[#13ec6d]/10 rounded-2xl">
-                            <Wallet className="text-[#13ec6d]" size={28} />
-                        </div>
-                        <span className="text-[#13ec6d] text-[10px] font-black uppercase tracking-widest bg-[#13ec6d]/10 px-3 py-1.5 rounded-full border border-[#13ec6d]/20 shadow-sm">Disponible</span>
-                    </div>
-                    <p className="text-[#4c9a66] text-[10px] font-black uppercase tracking-[0.2em] mb-2">Solde actuel</p>
-                    <div className="flex items-baseline gap-3 relative z-10">
-                        <p className="text-[#0d1b12] dark:text-white text-5xl font-black tracking-tighter">
-                            {isLoadingStats ? '...' : balance.toLocaleString()}
+            <div className="min-h-screen text-white p-6 md:p-10 font-body">
+                {/* Header */}
+                <div className="flex flex-col md:flex-row justify-between items-start md:items-center mb-10 gap-6">
+                    <div>
+                        <h1 className="font-bebas text-5xl tracking-wide text-accent-teal mb-2">
+                            DRIVER WALLET
+                        </h1>
+                        <p className="text-white/60 font-body text-lg">
+                            Financial overview and transaction history
                         </p>
-                        <p className="text-xl font-black text-[#4c9a66]">DZD</p>
                     </div>
-                </div>
-
-                <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[2.5rem] p-8 shadow-sm group">
-                    <div className="flex justify-between items-start mb-8">
-                        <div className="p-4 bg-blue-50 dark:bg-blue-900/20 rounded-2xl">
-                            <TrendingUp className="text-blue-600 dark:text-blue-400" size={28} />
-                        </div>
-                        <div className="flex flex-col items-end">
-                            <span className="text-emerald-500 text-xs font-black">+12%</span>
-                            <span className="text-[10px] text-[#4c9a66] font-bold uppercase tracking-tighter">vs mois dernier</span>
-                        </div>
-                    </div>
-                    <p className="text-[#4c9a66] text-[10px] font-black uppercase tracking-[0.2em] mb-2">Total gagné</p>
-                    <div className="flex items-baseline gap-3">
-                        <p className="text-[#0d1b12] dark:text-white text-5xl font-black tracking-tighter">
-                            {isLoadingStats ? '...' : (stats?.totalRevenue || 0).toLocaleString()}
-                        </p>
-                        <p className="text-xl font-black text-[#4c9a66]">DZD</p>
-                    </div>
-                </div>
-
-                <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[2.5rem] p-8 shadow-sm group">
-                    <div className="flex justify-between items-start mb-8">
-                        <div className="p-4 bg-purple-50 dark:bg-purple-900/20 rounded-2xl">
-                            <ArrowUpRight className="text-purple-600 dark:text-purple-400" size={28} />
-                        </div>
-                    </div>
-                    <p className="text-[#4c9a66] text-[10px] font-black uppercase tracking-[0.2em] mb-2">Trajets complétés</p>
-                    <div className="flex items-baseline gap-3">
-                        <p className="text-[#0d1b12] dark:text-white text-5xl font-black tracking-tighter">
-                            {isLoadingStats ? '...' : (stats?.completedTrips || 0)}
-                        </p>
-                        <p className="text-xl font-black text-[#4c9a66]">Total</p>
-                    </div>
-                </div>
-            </div>
-
-            {/* Transactions Table */}
-            <div className="bg-white dark:bg-slate-900 border border-slate-100 dark:border-slate-800 rounded-[3rem] overflow-hidden shadow-sm">
-                <div className="p-8 border-b border-slate-100 dark:border-slate-800 flex flex-wrap justify-between items-center gap-4">
-                    <h3 className="text-[#0d1b12] dark:text-white text-2xl font-black tracking-tight underline decoration-[#13ec6d] decoration-4 underline-offset-8">Historique des transactions</h3>
                     <div className="flex gap-4">
-                        <select className="bg-slate-50 dark:bg-slate-800/50 border-none rounded-2xl text-[10px] font-black uppercase tracking-widest py-3 px-6 focus:ring-2 focus:ring-[#13ec6d]/50 cursor-pointer appearance-none">
-                            <option>30 derniers jours</option>
-                            <option>3 derniers mois</option>
-                            <option>Cette année</option>
-                        </select>
+                        <button className="flex items-center gap-2 px-6 py-3 bg-white/5 border border-white/10 rounded-full text-xs font-bold uppercase tracking-widest hover:bg-white/10 transition-all font-mono hover:text-white text-white/60">
+                            <Download size={16} />
+                            Statement
+                        </button>
+                        <button className="flex items-center gap-2 px-8 py-3 bg-accent-teal text-night-900 rounded-full text-xs font-bold uppercase tracking-widest hover:scale-105 transition-all shadow-glow active:scale-95 font-mono">
+                            <Landmark size={16} />
+                            Withdraw Funds
+                        </button>
                     </div>
                 </div>
-                <div className="overflow-x-auto">
-                    {isLoadingTransactions ? (
-                        <div className="py-20 flex justify-center"><Loader2 className="animate-spin text-[#13ec6d]" size={40} /></div>
-                    ) : transactions.length === 0 ? (
-                        <div className="py-20 text-center font-bold text-slate-400 italic">Aucune transaction trouvée.</div>
-                    ) : (
-                        <table className="w-full text-left">
-                            <thead>
-                                <tr className="bg-slate-50 dark:bg-slate-800/30 border-b border-slate-100 dark:border-slate-800">
-                                    <th className="px-8 py-6 text-[#4c9a66] text-[10px] font-black uppercase tracking-[0.2em]">Date & Heure</th>
-                                    <th className="px-8 py-6 text-[#4c9a66] text-[10px] font-black uppercase tracking-[0.2em]">Description</th>
-                                    <th className="px-8 py-6 text-[#4c9a66] text-[10px] font-black uppercase tracking-[0.2em]">Référence</th>
-                                    <th className="px-8 py-6 text-[#4c9a66] text-[10px] font-black uppercase tracking-[0.2em] text-right">Montant</th>
-                                    <th className="px-8 py-6 text-[#4c9a66] text-[10px] font-black uppercase tracking-[0.2em] text-center">Statut</th>
-                                </tr>
-                            </thead>
-                            <tbody className="divide-y divide-slate-50 dark:divide-slate-800/50">
-                                {transactions.map((tx: any) => (
-                                    <tr key={tx.id} className="hover:bg-[#13ec6d]/5 transition-all duration-300">
-                                        <td className="px-8 py-8">
-                                            <p className="text-sm font-black text-[#0d1b12] dark:text-white">
-                                                {format(new Date(tx.date), 'dd MMM yyyy', { locale: fr })}
-                                            </p>
-                                            <p className="text-[10px] text-[#4c9a66] font-black uppercase tracking-tighter">
-                                                {format(new Date(tx.date), 'HH:mm')}
-                                            </p>
-                                        </td>
-                                        <td className="px-8 py-8">
-                                            <div className="flex items-center gap-4">
-                                                <div className={`size-10 rounded-2xl flex items-center justify-center shadow-sm ${tx.type === 'income' ? 'bg-[#13ec6d]/10 text-[#13ec6d]' : 'bg-red-500/10 text-red-500'}`}>
-                                                    {tx.type === 'income' ? <ArrowDownLeft size={20} /> : <ArrowUpRight size={20} />}
-                                                </div>
-                                                <div className="flex flex-col">
-                                                    <p className="text-sm font-black text-[#0d1b12] dark:text-white">{tx.from_city} → {tx.to_city}</p>
-                                                    <p className="text-[10px] text-[#4c9a66] font-black uppercase tracking-widest">{tx.category}</p>
-                                                </div>
-                                            </div>
-                                        </td>
-                                        <td className="px-8 py-8">
-                                            <span className="font-black text-[10px] text-slate-400 bg-slate-100 dark:bg-slate-800 px-3 py-1 rounded-full uppercase tracking-widest group-hover:bg-[#13ec6d]/20 transition-colors">
-                                                #{tx.id.split('-')[0]}
-                                            </span>
-                                        </td>
-                                        <td className="px-8 py-8 text-right">
-                                            <p className={`text-base font-black tracking-tight ${tx.type === 'income' ? 'text-[#0d1b12] dark:text-white' : 'text-red-500'}`}>
-                                                {tx.type === 'income' ? '+' : '-'}{parseFloat(tx.amount).toLocaleString()} <span className="text-[10px] text-[#4c9a66]">DZD</span>
-                                            </p>
-                                        </td>
-                                        <td className="px-8 py-8 text-center">
-                                            <span className={`inline-flex items-center gap-2 text-[10px] font-black px-4 py-2 rounded-xl uppercase tracking-[0.1em] ${tx.status === 'Complété'
-                                                ? 'bg-[#13ec6d]/10 text-[#13ec6d] border border-[#13ec6d]/20 shadow-sm shadow-[#13ec6d]/5'
-                                                : 'bg-blue-500/10 text-blue-500 border border-blue-500/20'
-                                                }`}>
-                                                <Circle size={6} fill="currentColor" className="animate-pulse" />
-                                                {tx.status}
-                                            </span>
-                                        </td>
+
+                {/* Summary Cards */}
+                <div className="grid grid-cols-1 md:grid-cols-3 gap-6 mb-12">
+                    {/* Main Balance Card */}
+                    <div className="bg-gradient-to-r from-accent-teal/20 to-transparent p-8 rounded-2xl border border-accent-teal/30 backdrop-blur-xl relative overflow-hidden group">
+                        <div className="absolute top-0 right-0 w-32 h-32 bg-accent-teal/10 rounded-full blur-[40px] -mr-10 -mt-10 group-hover:bg-accent-teal/20 transition-all"></div>
+                        <div className="flex justify-between items-start mb-6 relative z-10">
+                            <div className="p-3 bg-accent-teal/20 rounded-xl border border-accent-teal/20 shadow-[0_0_15px_rgba(20,184,166,0.2)]">
+                                <Wallet className="text-accent-teal" size={24} />
+                            </div>
+                            <span className="text-accent-teal text-[10px] font-bold uppercase tracking-widest bg-accent-teal/10 px-3 py-1 rounded-full border border-accent-teal/20">Available</span>
+                        </div>
+                        <p className="text-accent-teal/60 text-[10px] font-bold uppercase tracking-[0.2em] mb-1 font-mono">Current Balance</p>
+                        <div className="flex items-baseline gap-2 relative z-10">
+                            <h2 className="text-white text-5xl font-bebas tracking-wide">
+                                {isLoadingStats ? '...' : balance.toLocaleString()}
+                            </h2>
+                            <span className="text-sm font-bold text-accent-teal font-jetbrains">DZD</span>
+                        </div>
+                    </div>
+
+                    {/* Total Revenue */}
+                    <div className="bg-white/5 border border-white/10 p-8 rounded-2xl backdrop-blur-xl hover:border-white/20 transition-all group">
+                        <div className="flex justify-between items-start mb-6">
+                            <div className="p-3 bg-blue-500/10 rounded-xl border border-blue-500/20">
+                                <TrendingUp className="text-blue-500" size={24} />
+                            </div>
+                            <span className="text-green-400 text-xs font-mono font-bold bg-green-500/10 px-2 py-1 rounded border border-green-500/20">+12% vs last month</span>
+                        </div>
+                        <p className="text-white/40 text-[10px] font-bold uppercase tracking-[0.2em] mb-1 font-mono">Total Revenue</p>
+                        <div className="flex items-baseline gap-2">
+                            <h2 className="text-white text-4xl font-bebas tracking-wide">
+                                {isLoadingStats ? '...' : (stats?.totalRevenue || 0).toLocaleString()}
+                            </h2>
+                            <span className="text-xs font-bold text-white/40 font-jetbrains">DZD</span>
+                        </div>
+                    </div>
+
+                    {/* Trips Completed */}
+                    <div className="bg-white/5 border border-white/10 p-8 rounded-2xl backdrop-blur-xl hover:border-white/20 transition-all group">
+                        <div className="flex justify-between items-start mb-6">
+                            <div className="p-3 bg-purple-500/10 rounded-xl border border-purple-500/20">
+                                <ArrowUpRight className="text-purple-500" size={24} />
+                            </div>
+                        </div>
+                        <p className="text-white/40 text-[10px] font-bold uppercase tracking-[0.2em] mb-1 font-mono">Completed Trips</p>
+                        <div className="flex items-baseline gap-2">
+                            <h2 className="text-white text-4xl font-bebas tracking-wide">
+                                {isLoadingStats ? '...' : (stats?.completedTrips || 0)}
+                            </h2>
+                            <span className="text-xs font-bold text-white/40 font-jetbrains">TRIPS</span>
+                        </div>
+                    </div>
+                </div>
+
+                {/* Transactions Table */}
+                <div className="bg-white/5 border border-white/10 rounded-3xl overflow-hidden backdrop-blur-xl">
+                    <div className="p-8 border-b border-white/5 flex flex-wrap justify-between items-center gap-4">
+                        <h3 className="text-2xl font-display text-white tracking-wide">
+                            TRANSACTIONS
+                        </h3>
+                        <div className="flex gap-4">
+                            <select className="bg-night-900 border border-white/10 text-white rounded-xl text-[10px] font-bold uppercase tracking-widest py-3 px-6 focus:ring-1 focus:ring-accent-teal outline-none cursor-pointer appearance-none font-mono hover:bg-white/5 transition-all">
+                                <option>Last 30 Days</option>
+                                <option>Last 3 Months</option>
+                                <option>This Year</option>
+                            </select>
+                        </div>
+                    </div>
+
+                    <div className="overflow-x-auto">
+                        {isLoadingTransactions ? (
+                            <div className="py-20 flex justify-center"><Loader2 className="animate-spin text-accent-teal" size={40} /></div>
+                        ) : transactions.length === 0 ? (
+                            <div className="py-20 text-center font-bold text-white/20 italic font-mono">No transactions found.</div>
+                        ) : (
+                            <table className="w-full text-left border-collapse">
+                                <thead>
+                                    <tr className="border-b border-white/5 text-white/40 text-[10px] font-bold uppercase tracking-[0.2em] font-mono">
+                                        <th className="px-8 py-6">DATE & TIME</th>
+                                        <th className="px-8 py-6">DESCRIPTION</th>
+                                        <th className="px-8 py-6">REFERENCE</th>
+                                        <th className="px-8 py-6 text-right">AMOUNT</th>
+                                        <th className="px-8 py-6 text-center">STATUS</th>
                                     </tr>
-                                ))}
-                            </tbody>
-                        </table>
-                    )}
+                                </thead>
+                                <tbody className="divide-y divide-white/5">
+                                    {transactions.map((tx: any) => (
+                                        <tr key={tx.id} className="hover:bg-accent-teal/10 transition-all duration-300 group">
+                                            <td className="px-8 py-6">
+                                                <p className="text-sm font-bold text-white font-jetbrains">
+                                                    {format(new Date(tx.date), 'dd MMM yyyy', { locale: fr })}
+                                                </p>
+                                                <p className="text-[10px] text-white/40 font-mono uppercase tracking-widest mt-1">
+                                                    {format(new Date(tx.date), 'HH:mm')}
+                                                </p>
+                                            </td>
+                                            <td className="px-8 py-6">
+                                                <div className="flex items-center gap-4">
+                                                    <div className={`w-10 h-10 rounded-xl flex items-center justify-center border ${tx.type === 'income' ? 'bg-accent-teal/10 text-accent-teal border-accent-teal/20' : 'bg-red-500/10 text-red-500 border-red-500/20'
+                                                        }`}>
+                                                        {tx.type === 'income' ? <ArrowDownLeft size={18} /> : <ArrowUpRight size={18} />}
+                                                    </div>
+                                                    <div className="flex flex-col">
+                                                        <p className="text-sm font-bold text-white font-display uppercase tracking-wide">{tx.from_city} → {tx.to_city}</p>
+                                                        <p className="text-[10px] text-white/40 font-mono uppercase tracking-widest mt-0.5">{tx.category}</p>
+                                                    </div>
+                                                </div>
+                                            </td>
+                                            <td className="px-8 py-6">
+                                                <span className="font-mono font-bold text-[10px] text-white/40 bg-white/5 px-2 py-1 rounded border border-white/5 group-hover:border-white/10 transition-colors">
+                                                    #{tx.id.split('-')[0]}
+                                                </span>
+                                            </td>
+                                            <td className="px-8 py-6 text-right font-jetbrains">
+                                                <p className={`text-lg font-bold tracking-tight ${tx.type === 'income' ? 'text-green-400' : 'text-white'}`}>
+                                                    {tx.type === 'income' ? '+' : '-'}{parseFloat(tx.amount).toLocaleString()} <span className="text-[10px] text-white/40 font-normal">DZD</span>
+                                                </p>
+                                            </td>
+                                            <td className="px-8 py-6 text-center">
+                                                <div className="flex justify-center">
+                                                    <span className={`inline-flex items-center gap-2 text-[9px] font-bold px-3 py-1.5 rounded-full uppercase tracking-widest font-mono border ${tx.status === 'Complété'
+                                                        ? 'bg-accent-teal/10 text-accent-teal border-accent-teal/20'
+                                                        : 'bg-blue-500/10 text-blue-500 border-blue-500/20'
+                                                        }`}>
+                                                        <Circle size={6} fill="currentColor" className={tx.status === 'Complété' ? 'animate-pulse' : ''} />
+                                                        {tx.status === 'Complété' ? 'COMPLETED' : tx.status}
+                                                    </span>
+                                                </div>
+                                            </td>
+                                        </tr>
+                                    ))}
+                                </tbody>
+                            </table>
+                        )}
+                    </div>
                 </div>
             </div>
         </DriverLayout>
